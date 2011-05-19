@@ -1,7 +1,7 @@
 /*********************************************
  * File name: messaging.c
  * Author: Cassidy
- * Time-stamp: <2011-05-16 23:32:28>
+ * Time-stamp: <2011-05-19 19:07:17>
  *********************************************
  */
 
@@ -383,18 +383,19 @@ long do_intr_msg(long function, long src_dest, long * msg)
   if(cur_pid == src_dest)
     return -1;   //消息传递失败
   if(function == 1)
-    a = small_send(cur_pid, src_dest, msg);
+    {
+      //      a = small_send(cur_pid, src_dest, msg);
+      printa(*msg);
+      println();
+      return 1;
+    }
   else if(function == 2)
     a = small_receive(src_dest, cur_pid, msg);
   else if(function == 3)
     {
-      printa(*msg);
-      println();
-      /*
       entry = *msg;
       entry = (entry & 0xFFFFF000) + 0x1000;
       a = big_send(cur_pid, src_dest, &entry);
-      */
     }
   else if(function == 4)
     {

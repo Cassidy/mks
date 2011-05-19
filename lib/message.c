@@ -1,7 +1,7 @@
 /*********************************************
  * File name: message.c
  * Author: Cassidy
- * Time-stamp: <2011-05-16 23:33:24>
+ * Time-stamp: <2011-05-19 18:58:04>
  *********************************************
  */
 
@@ -56,7 +56,7 @@ long big_msg_send(long destination, struct Msg * msgpt)
     (							\
      "int $0x80"					\
      :"=a"(res)						\
-     :"0"(res), "b"(destination), "c"(*(long *)msgpt));
+     :"0"(res), "b"(destination), "c"((long)msgpt));
 
   if(res == 1)
     return 1;

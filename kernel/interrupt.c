@@ -1,7 +1,7 @@
 /*********************************************
  * File name: interrupt.c
  * Author: Cassidy
- * Time-stamp: <2011-05-17 17:36:25>
+ * Time-stamp: <2011-05-19 15:38:16>
  *********************************************
  */
 
@@ -61,7 +61,17 @@ void do_intr_debug2(long esp, long error_code)
   println();
 }
 
-/*
+
+void do_intr_0(void){printk("intr_occur 0");}
+void do_intr_1(void){printk("intr_occur 1");}
+void do_intr_2(void){printk("intr_occur 2");}
+void do_intr_3(void){printk("intr_occur 3");}
+void do_intr_4(void){printk("intr_occur 4");}
+void do_intr_5(void){printk("intr_occur 5");}
+void do_intr_6(void){printk("intr_occur 6");}
+void do_intr_7(void){printk("intr_occur 7");}
+void do_intr_8(void){printk("intr_occur 8");}
+void do_intr_9(void){printk("intr_occur 9");}
 void do_intr_10(void){printk("intr_occur 10");}
 void do_intr_11(void){printk("intr_occur 11");}
 void do_intr_12(void){printk("intr_occur 12");}
@@ -112,7 +122,7 @@ void do_intr_56(void){printk("intr_occur 56");}
 void do_intr_57(void){printk("intr_occur 57");}
 void do_intr_58(void){printk("intr_occur 58");}
 void do_intr_59(void){printk("intr_occur 59");}
-*/
+
 
 void intr_init()
 {
@@ -125,12 +135,12 @@ void intr_init()
   intr_table[39] = &do_intr_parallel;
   intr_table[0x88] = &do_intr_kercall;
   intr_table[13] = &do_intr_debug2;
+  intr_table[12] = &do_intr_debug2;
 
-  /*
   intr_table[10] = &do_intr_10;
   intr_table[11] = &do_intr_11;
-  intr_table[12] = &do_intr_12;
-  intr_table[13] = &do_intr_13;
+  //intr_table[12] = &do_intr_12;
+  //  intr_table[13] = &do_intr_13;
   intr_table[15] = &do_intr_15;
   intr_table[16] = &do_intr_16;
   intr_table[17] = &do_intr_17;
@@ -174,7 +184,7 @@ void intr_init()
   intr_table[57] = &do_intr_57;
   intr_table[58] = &do_intr_58;
   intr_table[59] = &do_intr_59;
-  */
+
 
   for(i=0; i<=2; i++)
     set_trap_gate(i, intr_enter[i]);

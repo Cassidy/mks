@@ -1,7 +1,7 @@
 /*********************************************
  * File name: unistd.h
  * Author: Cassidy
- * Time-stamp: <2011-05-14 20:59:18>
+ * Time-stamp: <2011-05-19 18:51:25>
  *********************************************
  */
 
@@ -16,6 +16,7 @@
 
 extern int errno;
 
+long * get_msg_entry(struct Msg * msgpt);
 long small_msg_send(long destination, long * msgpt);
 long small_msg_receive(long source, long * msgpt);
 long big_msg_send(long destination, struct Msg * msgpt);

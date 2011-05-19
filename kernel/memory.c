@@ -1,7 +1,7 @@
 /*********************************************
  * File name: memory.c
  * Author: Cassidy
- * Time-stamp: <2011-05-17 18:53:51>
+ * Time-stamp: <2011-05-19 14:00:32>
  *********************************************
  */
 
@@ -37,7 +37,11 @@ void mem_init(long start_mem, long end_mem)
   end_mem -= start_mem;
   end_mem >>= 12;
   while (end_mem-->0)
-    mem_map[i++] = 0;
+    {
+      //      mem_map[i++] = 0;
+      mem_map[i] = 0;
+      i++;
+    }
 }
 
 void copy_page(unsigned long from, unsigned long to)
@@ -63,7 +67,7 @@ void do_no_page(unsigned long addr)
       create_page_table(addr);
       table = (unsigned long *)((unsigned long)pg_dir + ((addr>>20)&0xFFC));
     }
-  page = (unsigned long *)((*table)&0xFFFFF000 + ((addr>>10)&0xFFC));
+  page = (unsigned long *)(((*table)&0xFFFFF000) + ((addr>>10)&0xFFC));
   if(addr < 64*1024*1024)
     *page = (addr & 0xFFFFF000) | 7;
   else
@@ -86,7 +90,7 @@ void do_wp_page(unsigned long addr)
   unsigned long new_page;
 
   table = (unsigned long *)((unsigned long)pg_dir + ((addr>>20)&0xFFC));
-  page = (unsigned long *)((*table)&0xFFFFF000 + ((addr>>10)&0xFFC));
+  page = (unsigned long *)(((*table)&0xFFFFF000) + ((addr>>10)&0xFFC));
   old_page = (*page)&0xFFFFF000;
   if(mem_map[MAP_NR(old_page)] == 1)
     *page |= 2;
@@ -136,11 +140,7 @@ unsigned long get_free_page(void)
 	    }
 	  p = (unsigned long *)(i << 12);
 	  for(j=0; j<(PAGE_SIZE/4); j++)
-	    {
-	      *p = 0;
-	      p++;
-	    }
-	  //	    *(p++) = 0;
+	    *(p++) = 0;
 	  mem_map[i] = 1;
 	  return (unsigned long)(i<<12);
 	}
@@ -182,11 +182,11 @@ void share_page(unsigned long from, unsigned long to)
       do_no_page(from);
       from_table = (unsigned long *)((unsigned long)pg_dir + ((from>>20)&0xFFC));
     }
-  from_page = (unsigned long *)((*from_table)&0xFFFFF000 + ((from>>10)&0xFFC));
+  from_page = (unsigned long*)(((*from_table)&0xFFFFF000) + ((from>>10)&0xFFC));
   while(!((*from_page) & 1))
     {
       do_no_page(from);
-      from_page = (unsigned long *)((*from_table)&0xFFFFF000 + ((from>>10)&0xFFC));
+      from_page = (unsigned long *)(((*from_table)&0xFFFFF000) + ((from>>10)&0xFFC));
     }
   to_table = (unsigned long *)((unsigned long)pg_dir + ((to>>20)&0xFFC));
   while(!((*to_table) & 1))
@@ -194,7 +194,7 @@ void share_page(unsigned long from, unsigned long to)
       create_page_table(to);
       to_table = (unsigned long *)((unsigned long)pg_dir + ((to>>20)&0xFFC));
     }
-  to_page = (unsigned long *)((*to_table)&0xFFFFF000 + ((to>>10)&0xFFC));
+  to_page = (unsigned long *)(((*to_table)&0xFFFFF000) + ((to>>10)&0xFFC));
 
   page = *from_page;
   mem_map[MAP_NR(page)]++;

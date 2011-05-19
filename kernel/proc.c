@@ -1,7 +1,7 @@
 /*********************************************
  * File name: proc.c
  * Author: Cassidy
- * Time-stamp: <2011-05-17 03:09:49>
+ * Time-stamp: <2011-05-19 18:45:59>
  *********************************************
  */
 
@@ -27,12 +27,6 @@ struct proc_struct * proc_current;   //当前进程指针
 
 
 long user_stack[PAGE_SIZE >> 2];     //内核临时堆栈,也是idle进程的用户堆栈
-/*
-long user_stack1[PAGE_SIZE >> 2];     //init进程的用户堆栈
-long user_stack2[PAGE_SIZE >> 2];     //system进程的用户堆栈
-long kernel_stack1[PAGE_SIZE >> 2];     //init进程的内核堆栈
-long kernel_stack2[PAGE_SIZE >> 2];     //system进程的内核堆栈
-*/
 
 struct          //内核临时堆栈指针ss:esp
 {
@@ -55,6 +49,7 @@ extern int share_multi_pages(unsigned long from, unsigned long to, long amount);
 void proc_init(void)
 {
   int i,j;
+  long size;  /*进程大小*/
   unsigned long *pp, *qq;
 
   struct desc_struct * p;
@@ -66,14 +61,19 @@ void proc_init(void)
     p->a = p->b = 0;
   for(i=0; i<NR_INIT_PROCS; i++)
     {
+      if(i == 0 )
+	size = 160;  /*进程大小为640k*/
+      else
+	size = 16 * 1024;   /*进程大小为64M*/
       proc[i] = (struct proc_struct *)&(init_procs[i]);
 
-      /*不知为什么,使用不了*proc[i]=*proc[0]方式赋值*/
+      /*******************************************/
+      /**不知为什么,使用不了*proc[i]=*proc[0]方式赋值**/
       pp = (unsigned long *)proc[i];
       qq = (unsigned long *)proc[0];
       for(j=0; j<(PAGE_SIZE>>2); j++)
 	*(pp++) = *(qq++);
-      /////////////////////
+      /*******************************************/
 
       proc[i]->pid = i;
       proc[i]->tss.esp0 = PAGE_SIZE + (long)proc[i];
@@ -82,20 +82,14 @@ void proc_init(void)
       proc[i]->tss.ebp = proc[i]->tss.esp;
       set_tss_desc(gdt + FIRST_TSS_ENTRY + i*2, &(proc[i]->tss));
       set_ldt_desc(gdt + FIRST_LDT_ENTRY + i*2, &(proc[i]->ldt));      
-      set_ldt_cs_desc((long *)&(proc[i]->ldt[1]), 0x4000000*i, 160);   //limit=640K/4K=160
-      set_ldt_ds_desc((long *)&(proc[i]->ldt[2]), 0x4000000*i, 160);
+      set_ldt_cs_desc((long *)&(proc[i]->ldt[1]), 0x4000000*i, size);   //limit=640K/4K=160
+      set_ldt_ds_desc((long *)&(proc[i]->ldt[2]), 0x4000000*i, size);
       if(i != 0)
-      	share_multi_pages(0, 0x4000000*i, 160);
+	{
+	  proc[i]->tss.esp = 0x4000000;        /*用户堆栈指针,指向64M末*/
+	  share_multi_pages(0, 0x4000000*i, 160);
+	}
     }
-
-  /*
-  //////临时使用///////////////
-  proc[1]->tss.esp0 = (long)&kernel_stack1[PAGE_SIZE>>2];
-  proc[2]->tss.esp0 = (long)&kernel_stack2[PAGE_SIZE>>2];
-  proc[1]->tss.esp = (long)&user_stack1[PAGE_SIZE>>2];
-  proc[2]->tss.esp = (long)&user_stack2[PAGE_SIZE>>2];
-  ///////////////////////////
-  */
 
   PROC_INIT;       //宏,在sys_define.h中
 

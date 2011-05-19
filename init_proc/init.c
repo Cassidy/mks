@@ -1,7 +1,7 @@
 /*********************************************
  * File name: init.c
  * Author: Cassidy
- * Time-stamp: <2011-05-17 00:41:29>
+ * Time-stamp: <2011-05-19 20:00:04>
  *********************************************
  */
 
@@ -9,11 +9,12 @@
 
 void init_proc(void)
 {
-  long a = 5;
-  long *p =&a;
-
-  //  small_msg_receive(2, p);
-  //  big_msg_send(2, p);
+  struct Msg msg;
+  long *p = get_msg_entry(&msg);
+  //  *p = 5;
+  big_msg_receive(2, &msg);
+  small_msg_send(2, p);
+  small_msg_send(2, p);
 
   for(;;)
     ;

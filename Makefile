@@ -1,7 +1,7 @@
 #/*********************************************
 # * File name: Makefile
 # * Author: Cassidy
-# * Time-stamp: <2011-05-15 22:44:03>
+# * Time-stamp: <2011-05-19 01:06:29>
 # *********************************************
 # */
 
@@ -10,7 +10,7 @@ AS	=as
 LD	=ld
 LDFLAGS =-m elf_i386 -Ttext 0 -s -x
 CC	=gcc -mcpu=i386
-CFLAGS	=-Wall -O2 -fomit-frame-pointer
+CFLAGS	=-Wall -fomit-frame-pointer
 CPP	=cpp -nostdinc -Iinclude
 
 ARCHIVES=kernel/kernel.o init_proc/init_proc.o system_task/system_task.o
@@ -36,6 +36,9 @@ Image:  boot/bootsect boot/setup system
 disk: Image
 	dd bs=8192 if=Image of=/dev/fd0
 	sync;sync;sync
+
+burn: Image
+	dd if=Image of=../../bochs/mks.img
 
 boot/head.o: boot/head.s
 	gcc  -traditional -c boot/head.s

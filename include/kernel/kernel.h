@@ -1,7 +1,7 @@
 /*********************************************
  * File name: kernel.h
  * Author: Cassidy
- * Time-stamp: <2011-05-12 00:04:49>
+ * Time-stamp: <2011-05-19 20:09:15>
  *********************************************
  */
 
@@ -13,10 +13,5 @@
 #include <kernel/printk.h>
 
 #define PAGE_SIZE 4096
-
-#ifndef NULL
-#define NULL ((void *) 0)     //定义空指针
-#endif
-
 
 #endif
