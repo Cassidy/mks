@@ -6,15 +6,20 @@
 # */
 
 # Makefile for MKS kernel.
+NASM = nasm
 AS	=as
 LD	=ld
-LDFLAGS =-m elf_i386 -Ttext 0 -s -x
-CC	=gcc -mcpu=i386
+CC	=gcc -march=i386
+
+NASMFLAGS = -w+orphan-labels
+LDFLAGS =-m elf_i386 -T kernel.lds -s -x
 CFLAGS	=-Wall -fomit-frame-pointer
 CPP	=cpp -nostdinc -Iinclude
 
 ARCHIVES=kernel/kernel.o init_proc/init_proc.o system_task/system_task.o
 LIBS	=lib/lib.a
+
+.PHONY: all Image system clean burn
 
 .c.s:
 	$(CC) $(CFLAGS) \
@@ -27,25 +32,26 @@ LIBS	=lib/lib.a
 
 all:    Image
 
-Image:  boot/bootsect boot/setup system
+Image:  boot/bootsect boot/setup boot/setup32 system
 	dd bs=512 if=boot/bootsect of=Image count=1
-	dd bs=512 if=boot/setup of=Image seek=1 count=4
-	objcopy -O binary system core
-	dd bs=512 if=core of=Image seek=5
+	dd bs=512 if=boot/setup of=Image seek=1 count=10
+	dd bs=512 if=boot/setup32 of=Image seek=11 count=88
+#	objcopy -O binary system core
+#	dd bs=512 if=core of=Image seek=5
+	dd bs=512 if=system of=Image seek=99
 
-disk: Image
+floppy: Image
 	dd bs=8192 if=Image of=/dev/fd0
 	sync;sync;sync
 
 burn: Image
-	dd if=Image of=../bochs/mks.img
+	dd if=Image of=/tmp/bochs/mks.img conv=notrunc
 
-boot/head.o: boot/head.s
-	gcc  -traditional -c boot/head.s
-	mv head.o boot/
+boot/kernel_start.o: boot/kernel_start.asm
+	$(NASM) $(NASMFLAGS) -f elf $< -o $@
 
-system:	boot/head.o $(ARCHIVES) $(LIBS)
-	$(LD) $(LDFLAGS) -e startup_32 -M boot/head.o \
+system:	boot/kernel_start.o $(ARCHIVES) $(LIBS)
+	$(LD) $(LDFLAGS) -M boot/kernel_start.o \
 	$(ARCHIVES) $(LIBS) \
 	-o system > System.map
 
@@ -58,16 +64,17 @@ init_proc/init_proc.o:
 lib/lib.a:
 	(cd lib; make)
 
-boot/setup: boot/setup.s
-	$(AS) -o boot/setup.o boot/setup.s
-	$(LD) $(LDFLAGS) -e start --oformat=binary boot/setup.o  -o boot/setup
+boot/setup32: boot/setup32.asm
+	$(NASM) $(NASMFLAGS) -f bin $< -o $@
 
-boot/bootsect: boot/bootsect.s
-	$(AS) -o boot/bootsect.o boot/bootsect.s
-	$(LD) $(LDFLAGS) -e _start --oformat=binary boot/bootsect.o  -o boot/bootsect
+boot/setup: boot/setup.asm
+	$(NASM) $(NASMFLAGS) -f bin $< -o $@
+
+boot/bootsect: boot/bootsect.asm
+	$(NASM) $(NASMFLAGS) -f bin $< -o $@
 
 clean:
-	rm -f Image System.map bootsect boot/bootsect boot/setup
+	rm -f Image System.map boot/bootsect boot/setup boot/setup32
 	rm -f system core boot/*.o
 	(cd kernel; make clean)
 	(cd system_task; make clean)
