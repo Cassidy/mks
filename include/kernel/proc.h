@@ -1,7 +1,7 @@
 /*********************************************
  * File name: proc.h
  * Author: Cassidy
- * Time-stamp: <2011-05-14 22:52:32>
+ * Time-stamp: <2011-05-26 18:23:53>
  *********************************************
  */
 
@@ -18,6 +18,7 @@
 
 #define RUNNING 0
 #define SLEEPING 1
+#define ZOMBIE 2
 
 struct i387_struct
 {
@@ -61,37 +62,37 @@ struct tss_struct
 
 struct proc_struct
 {
-  int proc_type;          //0:无效,1:Task,2:Server,3:User
-  long state;
-  long counter;
-  int exit_code;
+  int proc_type;          /* 进程类型(0-无效, 1-Task, 2-Server, 3-User) */
+  long state;             /* 运行状态 */
+  long counter;           /* 运行时间计数 */
+  int exit_code;          /* 进程停止执行后的退出码 */
   unsigned long start_code;
   unsigned long end_code;
   unsigned long end_data;
-  unsigned long brk;     //总长度（字节数）
+  unsigned long brk;      /* 总长度（字节数） */
   unsigned long start_stack;
-  long pid;
-  long father;
-  long pgrp;
-  long session;
-  long leader;
-  unsigned short uid;
-  unsigned short euid;
-  unsigned short suid;
-  unsigned short gid;
-  unsigned short egid;
-  unsigned short sgid;
-  long alarm;
-  long utime;
+  long pid;               /* 进程号 */
+  long father;            /* 父进程号 */
+  long pgrp;              /* 进程组号 */
+  long session;           /* 会话号 */
+  long leader;            /* 会话首领号 */
+  unsigned uid;           /* 用户 id */
+  unsigned euid;          /* 有效用户 id */
+  unsigned suid;          /* 保存的用户 id */
+  unsigned gid;           /* 组 id */
+  unsigned egid;          /* 有效组 id */
+  unsigned sgid;          /* 保存的组 id */
+  long alarm;             /* 用户态运行时间(滴答数) */
+  long utime;             /* 内核态运行时间(滴答数) */
   long stime;
   long cutime;
   long cstime;
   long start_time;
-  unsigned short used_math;
+  unsigned short used_math;         /* 是否使用了协处理器 */
   int tty;
-  struct proc_struct * next_ready;
-  struct desc_struct ldt[3];
-  struct tss_struct tss;
+  struct proc_struct * next_ready;  /* 在进程队列的下一个进程 */
+  struct desc_struct ldt[3];        /* 局部描述符表(0-空, 1-代码段, 2-数据段) */
+  struct tss_struct tss;            /* 进程的任务状态段信息结构 */
 };
 
 #define INIT_PROC_DATA	\

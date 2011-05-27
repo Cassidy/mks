@@ -1,7 +1,7 @@
 /*********************************************
  * File name: memory.c
  * Author: Cassidy
- * Time-stamp: <2011-05-19 14:00:32>
+ * Time-stamp: <2011-05-26 18:36:37>
  *********************************************
  */
 
@@ -37,11 +37,7 @@ void mem_init(long start_mem, long end_mem)
   end_mem -= start_mem;
   end_mem >>= 12;
   while (end_mem-->0)
-    {
-      //      mem_map[i++] = 0;
-      mem_map[i] = 0;
-      i++;
-    }
+    mem_map[i++] = 0;
 }
 
 void copy_page(unsigned long from, unsigned long to)
@@ -206,6 +202,7 @@ void share_page(unsigned long from, unsigned long to)
   invalidate();
 }
 
+/* 共享多个物理页面 */
 int share_multi_pages(unsigned long from, unsigned long to, long amount)
 {
   if((from&0xFFF) || (to&0xFFF))

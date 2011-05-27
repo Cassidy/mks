@@ -1,7 +1,7 @@
 #/*********************************************
 # * File name: Makefile
 # * Author: Cassidy
-# * Time-stamp: <2011-05-19 01:06:29>
+# * Time-stamp: <2011-05-22 22:48:02>
 # *********************************************
 # */
 
@@ -38,7 +38,7 @@ disk: Image
 	sync;sync;sync
 
 burn: Image
-	dd if=Image of=../../bochs/mks.img
+	dd if=Image of=../bochs/mks.img
 
 boot/head.o: boot/head.s
 	gcc  -traditional -c boot/head.s
