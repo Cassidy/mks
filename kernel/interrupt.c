@@ -19,6 +19,8 @@ typedef void (*intr_proc_t)(void);
 extern void do_intr_clock(long *, long, long);
 extern void do_intr_page(long *, unsigned long);
 
+struct desc_struct *idt;
+
 intr_addr_t intr_enter[20] = {
   &intr0, &intr1, &intr2, &intr3, &intr4, &intr5, &intr6, &intr7,
   &intr8, &intr9, &intr10, &intr11, &intr12, &intr13, &intr14,
@@ -128,6 +130,7 @@ void intr_init()
 {
   int i;
 
+  idt = IDT_ADDR;               /* IDT_ADDR = 0x6000 */
   for(i=0; i<255; i++)
     intr_table[i] = &do_intr_reserved;
   intr_table[14] = &do_intr_page;

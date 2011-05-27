@@ -111,7 +111,7 @@ struct proc_struct
 	},		\
 	  {0, 0, 0x10,	\
 	      0, 0, 0, 0,			\
-	      (long)&pg_dir,			\
+	      PAGE_DIR_ADDR,			\
 	      0, 0, 0, 0, 0,			\
 	      0, 0, 0, 0, 0,			\
 	      0x17,0x0F,0x17,0x17,0x17,0x17,	\

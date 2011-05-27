@@ -41,13 +41,13 @@ __asm__ ("movw %%dx,%%ax\n\t" \
 	"d" ((char *) (addr)),"a" (0x00080000))
 
 #define set_intr_gate(n,addr) \
-	_set_gate(&idt[n],14,0,addr)
+  _set_gate(idt + n, 14, 0, addr)
 
 #define set_trap_gate(n,addr) \
-	_set_gate(&idt[n],15,0,addr)
+	_set_gate(idt + n,15,0,addr)
 
 #define set_system_gate(n,addr) \
-	_set_gate(&idt[n],15,3,addr)
+	_set_gate(idt + n,15,3,addr)
 
 
 #define _set_ldt_seg_desc(gate_addr,type,base,limit) {	\

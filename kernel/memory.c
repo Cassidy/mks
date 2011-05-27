@@ -14,7 +14,7 @@
 #define USED 1
 #define UNUSED 0
 
-extern unsigned long pg_dir[1024];
+unsigned long *pg_dir;
 
 static long HIGH_MEMORY =0;     //全局变量，存放实际物理内存最高端地址。
 static unsigned char mem_map[PAGING_PAGES] = {0,};
@@ -32,6 +32,7 @@ void mem_init(unsigned long start_mem, unsigned long end_mem)
   int i;
   unsigned long mem_size;        /* 主内存容量大小 */
 
+  pg_dir = PAGE_DIR_ADDR;       /* PAGE_DIR_ADDR = 0x7000 */
   HIGH_MEMORY = end_mem;
 
   /* 将 64M 物理内存页初始化为 1（USED） */

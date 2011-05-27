@@ -9,8 +9,9 @@
 #include <kernel/proc.h>
 #include <asm/system.h>
 
-union proc_union           //进程控制体与其内核态堆栈,总共4KB
-{
+struct desc_struct *gdt;        /* 全局描述符表的入口地址 */
+
+union proc_union {              /* 进程控制体与其内核态堆栈,总共4KB */
   struct proc_struct proc;
   char stack[PAGE_SIZE];
 };
@@ -52,6 +53,7 @@ void proc_init(void)
 
   struct desc_struct * p;
 
+  gdt = GDT_ADDR;               /* GDT_ADDR = 0x6800 */
   for(i=0; i<NR_PROCS; i++)
     proc[i] = NULL;
   p = gdt + FIRST_TSS_ENTRY;

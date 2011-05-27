@@ -10,6 +10,9 @@
 
 #define HZ 100
 #define LATCH (1193180/HZ)
+#define GDT_ADDR 0x6800
+#define IDT_ADDR 0x6000
+#define PAGE_DIR_ADDR 0x7000
 #define COUNTER 10
 
 #define PROC_IDLE_NR 0
