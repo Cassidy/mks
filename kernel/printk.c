@@ -16,15 +16,13 @@ void con_init()
 {
   x = 0;
   y = 0;
-  char * ph = ORIG;
-  char * pe = ORIG + 4000;
-  while(ph < pe)
-    {
-      *ph = 32;          //显示空字符
-      ph++;
-      *ph = attr;        //黑底白字
-      ph++;
-    }
+  char * ph = ORIG;             /* 显存开始位置 */
+  char * pe = ORIG + 4000;      /* 显存结束位置 */
+  /* 清屏 */
+  while(ph < pe) {
+    *ph++ = 32;                 /* 显示空字符 */
+    *ph++ = attr;               /* 黑底白字 */
+  }
 }
 
 /*输出一字符,光标位置进一*/

@@ -7,11 +7,12 @@
 
 #include <kernel/kernel.h>
 
-#define LOW_MEM 0x100000
-#define PAGING_MEMORY (64*1024*1024)
-#define PAGING_PAGES (PAGING_MEMORY>>12)
-#define MAP_NR(addr) (addr>>12)
+#define LOW_MEM 0x100000             /* 1M 内存开始处 */
+#define PAGING_MEMORY (64*1024*1024)     /* 物理内存可用于分页的总容量 */
+#define PAGING_PAGES (PAGING_MEMORY>>12) /* 物理内存可用于分页的页数量 */
+#define MAP_NR(addr) (addr>>12)          /* 物理地址 addr 在物理内存页的第几页（从 0 开始计数） */
 #define USED 1
+#define UNUSED 0
 
 extern unsigned long pg_dir[1024];
 
@@ -26,18 +27,24 @@ void invalidate(void)
   __asm__("movl %%eax, %%cr3"::"a"(pg_dir));
 }
 
-void mem_init(long start_mem, long end_mem)
+void mem_init(unsigned long start_mem, unsigned long end_mem)
 {
   int i;
+  unsigned long mem_size;        /* 主内存容量大小 */
 
   HIGH_MEMORY = end_mem;
+
+  /* 将 64M 物理内存页初始化为 1（USED） */
   for (i=0 ; i<PAGING_PAGES ; i++)
     mem_map[i] = USED;
-  i = MAP_NR(start_mem);
-  end_mem -= start_mem;
-  end_mem >>= 12;
-  while (end_mem-->0)
-    mem_map[i++] = 0;
+
+  i = MAP_NR(start_mem);        /* 主内存起始地址在内存页的第几页（4KB为一页） */
+  mem_size = end_mem - start_mem;
+  mem_size >>= 12;              /* 主内存所拥有的内存页数量 */
+
+  /* 主内存页初始化为未使用 */
+  while (mem_size-- > 0)
+    mem_map[i++] = UNUSED;
 }
 
 void copy_page(unsigned long from, unsigned long to)
