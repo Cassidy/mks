@@ -64,6 +64,7 @@ long kernel_mktime(struct tm * tm)
 	return res;
 }
 
+/* time_init: 时间初始化 */
 void time_init(void)
 {
   struct tm time;

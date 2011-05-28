@@ -13,13 +13,14 @@
 
 #define INTR_NUM 255
 
+/* 定义两个同义的函数指针，指向返回类型是 void，参数也是 void 的函数 */
 typedef void (*intr_addr_t)(void);
 typedef void (*intr_proc_t)(void);
 
 extern void do_intr_clock(long *, long, long);
 extern void do_intr_page(long *, unsigned long);
 
-struct desc_struct *idt;
+struct desc_struct *idt;        /* 定义指向中断描述符表的指针 */
 
 intr_addr_t intr_enter[20] = {
   &intr0, &intr1, &intr2, &intr3, &intr4, &intr5, &intr6, &intr7,
@@ -35,6 +36,7 @@ intr_addr_t intr_reserv_enter = &intr_reserved;
 intr_addr_t intr_msg_enter = &intr_msg;
 intr_addr_t intr_kercall_enter = &intr_kercall;
 
+/* intr_table 函数指针数组，数组元素的类型是函数指针，有 INTR_NUM(256) 个元素 */
 intr_proc_t intr_table[INTR_NUM];
 
 void do_intr_parallel(void)
@@ -125,7 +127,7 @@ void do_intr_57(void){printk("intr_occur 57");}
 void do_intr_58(void){printk("intr_occur 58");}
 void do_intr_59(void){printk("intr_occur 59");}
 
-
+/* 中断初始化 */
 void intr_init()
 {
   int i;
@@ -143,7 +145,7 @@ void intr_init()
   intr_table[10] = &do_intr_10;
   intr_table[11] = &do_intr_11;
   //intr_table[12] = &do_intr_12;
-  //  intr_table[13] = &do_intr_13;
+  //intr_table[13] = &do_intr_13;
   intr_table[15] = &do_intr_15;
   intr_table[16] = &do_intr_16;
   intr_table[17] = &do_intr_17;
@@ -202,12 +204,12 @@ void intr_init()
   for(i=48; i<=255; i++)
     set_trap_gate(i, intr_reserv_enter);
 
-  set_intr_gate(14, intr_enter[14]);     //页面错误，中断门
-  set_system_gate(0x80, intr_msg_enter);      //消息中断
-  set_system_gate(0x88, intr_kercall_enter);  //内核调用中断
+  set_intr_gate(14, intr_enter[14]);         /* 页面错误，中断门 */
+  set_system_gate(0x80, intr_msg_enter);     /* 消息中断 */
+  set_system_gate(0x88, intr_kercall_enter); /* 内核调用中断 */
 
-  outb_p(inb_p(0x21) & 0xFB, 0x21);   //允许8259Ａ主芯片的IRQ2中断请求
-  outb_p(inb_p(0xA1) & 0xDF, 0xA1);    //允许8259Ａ从芯片的IRQ13中断请求
+  outb_p(inb_p(0x21) & 0xFB, 0x21); /* 允许8259Ａ主芯片的IRQ2中断请求 */
+  outb_p(inb_p(0xA1) & 0xDF, 0xA1); /* 允许8259Ａ从芯片的IRQ13中断请求 */
   /*
   outb_p(0x36, 0x43);
   outb_p(LATCH & 0xFF, 0x40);
