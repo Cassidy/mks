@@ -8,16 +8,7 @@
 #include <kernel/kernel.h>
 #include <asm/system.h>
 
-#define EXT_MEM_K (*(unsigned short *)0x90002)   //1MB以后的扩展内存大小(KB)
-/*
-#define get_eflags() ({				\
-      unsigned long _ef;			\
-      __asm__("pushfl\n"			\
-	      "\tpopl %%eax"			\
-	      :"=a"(_ef):);			\
-      _ef;					\
-    })
-*/
+#define MEM_SIZE (*(unsigned long *)0x90000) /* RAM 内存总量 */
 
 extern void mem_init(unsigned long start, unsigned long end);     //内存初始化
 extern void intr_init(void);                    //中断初始化
@@ -34,7 +25,7 @@ void main(void)
 {
   con_init();              //显示初始化
 
-  memory_end = (1<<20) + (EXT_MEM_K<<10);    //内存大小 = 1MB+扩展内存(k)*1024B
+  memory_end = MEM_SIZE;                     /* RAM 内存总量 */
   memory_end &= 0xFFFFF000;                  //忽略不到4KB(1页)的内存数
 
   if(memory_end > 64*1024*1024)              //如果内存量超过64MB,则按64MB计
