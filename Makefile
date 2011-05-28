@@ -30,7 +30,7 @@ LIBS	=lib/lib.a
 	$(CC) $(CFLAGS) \
 	-nostdinc -Iinclude -c -o $*.o $<
 
-all:    Image
+all:    clean Image burn
 
 Image:  boot/bootsect boot/setup boot/setup32 system
 	dd bs=512 if=boot/bootsect of=Image count=1
