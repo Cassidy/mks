@@ -2,8 +2,6 @@
         ;; Purpose: 设置好保护模式的环境，跳转到保护模式。
         ;; Date: 2011-3-9 19:42
         ;; Author: mofaph <mofaph@gmail.com>
-	
-	RAM_size_addr equ 0x9000 ; 内存总量所在的物理地址
 
         jmp short setup_start
 
