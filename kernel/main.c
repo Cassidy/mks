@@ -8,7 +8,7 @@
 #include <kernel/kernel.h>
 #include <asm/system.h>
 
-#define RAM_SIZE (*(unsigned long *)0x90000) /* 内存总量，以字节为单位 */
+#define MEM_SIZE (*(unsigned long *)0x90000) /* RAM 内存总量 */
 
 extern void mem_init(unsigned long start, unsigned long end);     //内存初始化
 extern void intr_init(void);                    //中断初始化
@@ -25,7 +25,7 @@ void main(void)
 {
   con_init();              //显示初始化
 
-  memory_end = RAM_SIZE;		  /* 内存总量（B） */
+  memory_end = MEM_SIZE;                     /* RAM 内存总量 */
   memory_end &= 0xFFFFF000;                  //忽略不到4KB(1页)的内存数
 
   if(memory_end > 64*1024*1024)              //如果内存量超过64MB,则按64MB计
