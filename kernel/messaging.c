@@ -26,7 +26,7 @@ struct msg_struct * big_receive_tail;
 
 struct msg_struct msg_hardware[NR_MSG_HARDWARE];  //硬件中断消息
 
-/*消息传递初始化*/
+/* 消息传递初始化 */
 void msg_init(void)
 {
   long i;

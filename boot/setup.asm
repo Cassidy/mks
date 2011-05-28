@@ -7,6 +7,9 @@
 
         jmp short setup_start
 
+        RAM_size_addr   equ     0x90000 ; 段基址
+        RAM_size_offset equ     0x0000  ; 段偏移
+
 msg_ARDS:               db      "BaseAddrHigh BaseAddrLow LengthHigh LengthLow  Type",0
 msg_RAM_size:           db      "RAM Total Size: ",     0
 msg_memory_size:        db      "RAM Size: ",           0
@@ -146,8 +149,8 @@ display_memory_size:
         pop ax
 
 .calculate_RAM_size:        
-        cmp eax, 1
-        jne .next_ARDS
+        ;; cmp eax, 1
+        ;; jne .next_ARDS
         mov dword eax, [es:di+8]
         add dword [RAM_size], eax
 
@@ -162,7 +165,17 @@ display_memory_size:
         mov cx, msg_RAM_size
         call disp_str
         mov dword eax, [RAM_size]
-        mov [RAM_size_addr], eax
+
+        ;; 把 RAM 总量放在内存地址 0x90000 处
+        push fs
+        push eax
+        mov eax, RAM_size_addr  ; RAM_size_addr = 0x90000(4个0)
+        shr eax, 4              ; 右移 4 位，现在 ax = 0x9000(3个0)
+        mov fs, ax              ; 现在 fs = 0x9000
+        pop eax                 ; eax = RAM 总量
+        mov [fs:RAM_size_offset], eax
+        pop fs
+
         call print_hex
         pop cx
 
