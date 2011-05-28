@@ -2,6 +2,8 @@
         ;; Purpose: 设置好保护模式的环境，跳转到保护模式。
         ;; Date: 2011-3-9 19:42
         ;; Author: mofaph <mofaph@gmail.com>
+	
+	RAM_size_addr equ 0x9000 ; 内存总量所在的物理地址
 
         jmp short setup_start
 
@@ -160,7 +162,7 @@ display_memory_size:
         mov cx, msg_RAM_size
         call disp_str
         mov dword eax, [RAM_size]
-        mov [0x90002], eax
+        mov [RAM_size_addr], eax
         call print_hex
         pop cx
 

@@ -1,7 +1,7 @@
 /*********************************************
  * File name: proc.c
  * Author: Cassidy
- * Time-stamp: <2011-05-26 20:01:32>
+ * Time-stamp: <2011-05-28 19:43:34>
  *********************************************
  */
 
@@ -85,8 +85,9 @@ void proc_init(void)
       set_ldt_desc(gdt + FIRST_LDT_ENTRY + i*2, &(proc[i]->ldt));      
       set_ldt_cs_desc((long *)&(proc[i]->ldt[1]), 0x4000000*i, 16384);   //limit=64MK/4K=16*1024=16384
       set_ldt_ds_desc((long *)&(proc[i]->ldt[2]), 0x4000000*i, 16384);
-      /* 共享多个物理页面, 线性地址分别分 0 和 0x4000000*i, 共享页面个数为 640KB/4KB=160 */
-      share_multi_pages(0, 0x4000000*i, 160);
+      if(i != 0)
+	/* 共享多个物理页面, 线性地址分别分 0 和 0x4000000*i, 共享页面个数为 640KB/4KB=160 */
+	share_multi_pages(0, 0x4000000*i, 160);
     }
 
   PROC_INIT;       //宏,在config.h中
