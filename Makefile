@@ -19,7 +19,7 @@ CPP	=cpp -nostdinc -Iinclude
 ARCHIVES=kernel/kernel.o init_proc/init_proc.o system_task/system_task.o
 LIBS	=lib/lib.a
 
-.PHONY: all Image system clean burn
+.PHONY: all Image system clean burn purge
 
 .c.s:
 	$(CC) $(CFLAGS) \
@@ -31,6 +31,7 @@ LIBS	=lib/lib.a
 	-nostdinc -Iinclude -c -o $*.o $<
 
 all:    clean Image burn
+purge: clean
 
 Image:  boot/bootsect boot/setup boot/setup32 system
 	dd bs=512 if=boot/bootsect of=Image count=1
@@ -74,11 +75,15 @@ boot/bootsect: boot/bootsect.asm
 	$(NASM) $(NASMFLAGS) -f bin $< -o $@
 
 clean:
-	rm -f Image System.map boot/bootsect boot/setup boot/setup32
+	rm -f boot/bootsect boot/setup boot/setup32
 	rm -f system core boot/*.o
 	(cd kernel; make clean)
 	(cd system_task; make clean)
 	(cd init_proc; make clean)
 	(cd lib; make clean)
+
+purge: clean
+	make clean
+	rm -f Image System.map
 
 ### Dependencies:
