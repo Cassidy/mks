@@ -1,7 +1,7 @@
 /*********************************************
  * File name: proc.c
  * Author: Cassidy
- * Time-stamp: <2011-05-29 20:24:44>
+ * Time-stamp: <2011-05-29 20:50:40>
  *********************************************
  */
 
@@ -26,15 +26,6 @@ struct proc_struct * user_head;      //用户进程队列头指针
 struct proc_struct * user_tail;      //用户进程队列尾指针
 struct proc_struct * proc_current;   //当前进程指针
 
-//long user_stack[PAGE_SIZE >> 2];     //内核临时堆栈,也是idle进程的用户堆栈
-/*
-struct          //内核临时堆栈指针ss:esp
-{
-  long *a;
-  short b;
-} stack_start = {&user_stack[PAGE_SIZE>>2], 0x10};
-*/
-//初始进程控制体
 union proc_union init_procs[NR_INIT_PROCS] = 
   {
     {INIT_PROC_DATA,},
@@ -75,9 +66,6 @@ void proc_init(void)
       proc[i]->tss.esp0 = PAGE_SIZE + (long)proc[i];
       proc[i]->tss.ldt = LDT(i);
 
-      //      if(i == 0)
-      //        proc[i]->tss.esp = (long)&user_stack[PAGE_SIZE>>2];
-      //      else
       proc[i]->tss.esp = 0x4000000;        /*用户堆栈指针,指向64M末*/
       proc[i]->tss.ebp = proc[i]->tss.esp;
       set_tss_desc(gdt + FIRST_TSS_ENTRY + i*2, &(proc[i]->tss));

@@ -1,7 +1,7 @@
 /*********************************************
  * File name: messaging.c
  * Author: Cassidy
- * Time-stamp: <2011-05-19 19:07:17>
+ * Time-stamp: <2011-05-29 20:53:44>
  *********************************************
  */
 
@@ -222,7 +222,7 @@ long small_receive(long src, long dest, long * msg)
   return 1;
 }
 
-/*发送大消息处理*/
+/* FIXME: 发送大消息处理, 但发送不成功 */
 long big_send(long src, long dest, long * msg)
 {
   struct msg_struct * msg_p = big_receive_head;
@@ -298,7 +298,7 @@ long big_send(long src, long dest, long * msg)
   return 1;
 }
 
-/*接收大消息处理*/
+/* FIXME：接收大消息处理，但接收不成功 */
 long big_receive(long src, long dest, long * msg)
 {
   struct msg_struct * msg_p = big_send_head;
