@@ -21,6 +21,9 @@
 setup32_start:
         mov eax, 0x10
         mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
         mov ss, ax
         mov esp, 0x9f000
 
@@ -32,14 +35,15 @@ setup32_start:
 reload_segment:
         mov eax, 0x10           ; 0x10 指向新的数据段描述符
         mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
         mov ss, ax
         mov esp, 0x9f000
-        mov eax, 0x18
-        mov gs, ax
 
         call setup_paging
 
-        jmp 0x00010000          ; 跳转到 kernel 执行
+        jmp 0x00010000          ; 跳转到 kernel_start 执行
 
 load_idt:
         lea edx, [ignore_int]   ; edx 是中断门高 32 位
@@ -168,27 +172,20 @@ gdt:
         dd 0x00000000
         dd 0x00000000
 
-        ;; 32MB 可读非一致代码段
+        ;; 64MB 可读非一致代码段
         ;; 段基址：0x00000000 段界限：0x02000
         ;; G=1 D/B=1 AVL=0 P=1 DPL=00 TYPE=1010
-        dw 0x1fff
+        dw 0x0000
         dw 0x0000
         dw 0x9a00
-        dw 0x00c0
+        dw 0x00c1
 
-        ;; 32MB 可写数据段
+        ;; 64MB 可读写数据段
         ;; 段基址：0x00000000 段界限：0x02000
         ;; G=1 D/B=1 AVL=0 P=1 DPL=00 TYPE=0010
-        dw 0x1fff
+        dw 0x0000
         dw 0x0000
         dw 0x9200
-        dw 0x00c0
+        dw 0x00c1
 
-        ;; Mono text video buffer
-        ;; 16位数据段
-        dw 0x7fff
-        dw 0x8000
-        dw 0x9209
-        dw 0x0000
-
-        times 504 dd 0          ; 其余 252 个段描述符留空
+        times 506 dd 0          ; 其余 253 个段描述符留空

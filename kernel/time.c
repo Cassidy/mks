@@ -1,7 +1,7 @@
 /*********************************************
  * File name: time.c
  * Author: Cassidy
- * Time-stamp: <2011-05-15 02:21:28>
+ * Time-stamp: <2011-05-29 20:13:38>
  *********************************************
  */
 
@@ -95,7 +95,6 @@ void time_init(void)
 
 void do_intr_clock(long *eip, long error_code, long cpl)
 {
-  //  printk("clock_intr");
   printa(proc_current->pid);
   println();
   jiffies++;

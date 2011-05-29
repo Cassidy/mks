@@ -1,7 +1,7 @@
 /*********************************************
  * File name: interrupt.c
  * Author: Cassidy
- * Time-stamp: <2011-05-19 15:38:16>
+ * Time-stamp: <2011-05-29 04:32:03>
  *********************************************
  */
 
@@ -140,12 +140,12 @@ void intr_init()
   intr_table[39] = &do_intr_parallel;
   intr_table[0x88] = &do_intr_kercall;
   intr_table[13] = &do_intr_debug2;
-  intr_table[12] = &do_intr_debug2;
+  //  intr_table[12] = &do_intr_debug2;
 
   intr_table[10] = &do_intr_10;
   intr_table[11] = &do_intr_11;
-  //intr_table[12] = &do_intr_12;
-  //intr_table[13] = &do_intr_13;
+  intr_table[12] = &do_intr_12;
+  // intr_table[13] = &do_intr_13;
   intr_table[15] = &do_intr_15;
   intr_table[16] = &do_intr_16;
   intr_table[17] = &do_intr_17;
