@@ -1,0 +1,34 @@
+# 此为注释，将被 Git 忽略
+# *.a 忽略所有 .a 结尾的文件
+# !lib.a 但 lib.a 除外
+# /TODO 仅仅忽略项目根目录下的 TODO 文件，不包括 subdir/TODO
+# build/ 忽略 build/ 目录下的文件
+# doc/*.txt 忽略 doc/notes.txt 但不包括 doc/server/arch.txt
+
+bootsect*
+!bootsect.asm
+simple-boot.asm
+*.[0-9]*
+bootsect.asm.2011.4.27
+setup.asm.2011.3.22
+MKS
+mks-design.toc
+System.map
+Image
+system
+
+*.[ao]
+*~
+*.exe
+*.aux
+*.img
+*.pdf
+*.txt
+auto/
+
+# 不追踪可执行文件，太大了……
+bootsect
+setup
+setup32
+
+# END
