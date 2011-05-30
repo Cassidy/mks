@@ -1,7 +1,7 @@
 /*********************************************
  * File name: messaging.c
  * Author: Cassidy
- * Time-stamp: <2011-05-29 20:53:44>
+ * Time-stamp: <2011-05-30 15:01:20>
  *********************************************
  */
 
@@ -222,7 +222,7 @@ long small_receive(long src, long dest, long * msg)
   return 1;
 }
 
-/* FIXME: 发送大消息处理, 但发送不成功 */
+/* 发送大消息处理 */
 long big_send(long src, long dest, long * msg)
 {
   struct msg_struct * msg_p = big_receive_head;
@@ -298,7 +298,7 @@ long big_send(long src, long dest, long * msg)
   return 1;
 }
 
-/* FIXME：接收大消息处理，但接收不成功 */
+/* 接收大消息处理 */
 long big_receive(long src, long dest, long * msg)
 {
   struct msg_struct * msg_p = big_send_head;
@@ -395,12 +395,16 @@ long do_intr_msg(long function, long src_dest, long * msg)
     {
       entry = *msg;
       entry = (entry & 0xFFFFF000) + 0x1000;
+      /* 消息线性地址 ＝ 消息偏移地址 ＋ 段基地址*/
+      entry += cur_pid * 0x4000000;
       a = big_send(cur_pid, src_dest, &entry);
     }
   else if(function == 4)
     {
       entry = *msg;
       entry = (entry & 0xFFFFF000) + 0x1000;
+      /* 消息线性地址 ＝ 消息偏移地址 ＋ 段基地址*/
+      entry += cur_pid * 0x4000000;
       a = big_receive(src_dest, cur_pid, &entry);
     }
   else
