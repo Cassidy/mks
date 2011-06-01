@@ -17,10 +17,10 @@
 typedef void (*intr_addr_t)(void);
 typedef void (*intr_proc_t)(void);
 
-extern void do_intr_clock(long *, long, long);
-extern void do_intr_page(long *, unsigned long);
+extern void do_intr_clock(long *, long, long);   /* kernel/time.c */
+extern void do_intr_page(long *, unsigned long); /* kernel/memory.c */
 
-struct desc_struct *idt;        /* 定义指向中断描述符表的指针 */
+struct desc_struct *idt;              /* 定义指向中断描述符表的指针 */
 
 intr_addr_t intr_enter[20] = {
   &intr0, &intr1, &intr2, &intr3, &intr4, &intr5, &intr6, &intr7,
@@ -36,7 +36,7 @@ intr_addr_t intr_reserv_enter = &intr_reserved;
 intr_addr_t intr_msg_enter = &intr_msg;
 intr_addr_t intr_kercall_enter = &intr_kercall;
 
-/* intr_table 函数指针数组，数组元素的类型是函数指针，有 INTR_NUM(256) 个元素 */
+/* intr_table: 中断向量表 */
 intr_proc_t intr_table[INTR_NUM];
 
 void do_intr_parallel(void)
@@ -133,19 +133,23 @@ void intr_init()
   int i;
 
   idt = IDT_ADDR;               /* IDT_ADDR = 0x6000 */
+
+  /* 初始化所有中断向量为保留的 */
   for(i=0; i<255; i++)
     intr_table[i] = &do_intr_reserved;
+
+  /* 设置特定的中断向量 */
+  intr_table[13] = &do_intr_debug2;
   intr_table[14] = &do_intr_page;
   intr_table[32] = &do_intr_clock;
   intr_table[39] = &do_intr_parallel;
   intr_table[0x88] = &do_intr_kercall;
-  intr_table[13] = &do_intr_debug2;
-  //  intr_table[12] = &do_intr_debug2;
 
   intr_table[10] = &do_intr_10;
   intr_table[11] = &do_intr_11;
   intr_table[12] = &do_intr_12;
-  // intr_table[13] = &do_intr_13;
+  /* intr_table[13] = &do_intr_debug2; */
+  /* intr_table[14] = &do_intr_page; */
   intr_table[15] = &do_intr_15;
   intr_table[16] = &do_intr_16;
   intr_table[17] = &do_intr_17;
@@ -163,12 +167,14 @@ void intr_init()
   intr_table[29] = &do_intr_29;
   intr_table[30] = &do_intr_30;
   intr_table[31] = &do_intr_31;
+  /* intr_table[32] = &do_intr_clock; */
   intr_table[33] = &do_intr_33;
   intr_table[34] = &do_intr_34;
   intr_table[35] = &do_intr_35;
   intr_table[36] = &do_intr_36;
   intr_table[37] = &do_intr_37;
   intr_table[38] = &do_intr_38;
+  /* intr_table[39] = &do_intr_parallel; */
   intr_table[40] = &do_intr_40;
   intr_table[41] = &do_intr_41;
   intr_table[42] = &do_intr_42;
@@ -190,7 +196,7 @@ void intr_init()
   intr_table[58] = &do_intr_58;
   intr_table[59] = &do_intr_59;
 
-
+  /* 设置中断描述符表 */
   for(i=0; i<=2; i++)
     set_trap_gate(i, intr_enter[i]);
   for(i=3; i<=5; i++)

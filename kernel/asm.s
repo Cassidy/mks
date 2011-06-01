@@ -191,8 +191,8 @@ no_error_code:
 	push %es
 	push %fs
 	
-	movl 44(%esp), %edx
-	andl $3, %edx
+	movl 44(%esp), %edx /* edx = cs */
+	andl $3, %edx /* ??? */
 	pushl %edx
 	
 	pushl $0

@@ -14,9 +14,9 @@
 #define USED 1
 #define UNUSED 0
 
-unsigned long *pg_dir;
+unsigned long *pg_dir;          /* 页目录表起始地址 */
 
-static long HIGH_MEMORY =0;     //全局变量，存放实际物理内存最高端地址。
+static long HIGH_MEMORY =0;     /* 全局变量，存放实际物理内存最高端地址。 */
 static unsigned char mem_map[PAGING_PAGES] = {0,};
 
 unsigned long get_free_page(void);
@@ -58,7 +58,7 @@ void copy_page(unsigned long from, unsigned long to)
     *(q++) = *(p++);
 }
 
-/*缺页处理,临时使用,并不完整,有待完善*/
+/* 缺页处理,临时使用,并不完整,有待完善 */
 void do_no_page(unsigned long addr)
 {
   unsigned long * table;
@@ -85,7 +85,7 @@ void do_no_page(unsigned long addr)
   invalidate();
 }
 
-//写保护处理
+/* 写保护处理 */
 void do_wp_page(unsigned long addr)
 {
   unsigned long * table;
@@ -101,7 +101,7 @@ void do_wp_page(unsigned long addr)
   else
     {
       if(!(new_page=get_free_page()))
-	return;
+        return;
       mem_map[MAP_NR(old_page)]--;
       copy_page(old_page, new_page);
       *page = new_page | 7;
@@ -121,11 +121,11 @@ void do_intr_page(long *eip, unsigned long error_code)
 
   if((error_code & 0x1) == 0)
     do_no_page(addr);
-  else
+  else /* (error_code & 0x1) != 0 */
     do_wp_page(addr);
 }
 
-/*获取空闲页面,返回物理地址,如果没有空闲页面,就返回0.*/
+/* 获取空闲页面,返回物理地址,如果没有空闲页面,就返回0. */
 unsigned long get_free_page(void)
 {
   long i,j;
@@ -153,7 +153,7 @@ unsigned long get_free_page(void)
   return 0;
 }
 
-/*创建页表,返回0表示已存在,返回1表示创建成功,返回-1表示创建失败*/
+/* 创建页表,返回0表示已存在,返回1表示创建成功,返回-1表示创建失败 */
 int create_page_table(unsigned long addr)
 {
   unsigned long * table;
@@ -171,7 +171,7 @@ int create_page_table(unsigned long addr)
   return 1;
 }
 
-/*共享页面*/
+/* 共享页面 */
 void share_page(unsigned long from, unsigned long to)
 {
   unsigned long * from_table;

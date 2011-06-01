@@ -9,7 +9,7 @@
 #define _PROC_H
 
 #include <kernel/kernel.h>
-#include <kernel/head.h>
+#include <kernel/head.h>        /* desc_struct */
 
 #define FIRST_TSS_ENTRY 4
 #define FIRST_LDT_ENTRY 5
@@ -32,8 +32,8 @@ struct i387_struct
   long st_space[20];
 };
 
-struct tss_struct
-{
+/* 任务状态段结构体 */
+struct tss_struct {
   long back_link;
   long esp0;
   long ss0;
@@ -60,8 +60,8 @@ struct tss_struct
   struct i387_struct i387;
 };
 
-struct proc_struct
-{
+/* 进程结构体 */
+struct proc_struct {
   int proc_type;          /* 进程类型(0-无效, 1-Task, 2-Server, 3-User) */
   long state;             /* 运行状态 */
   long counter;           /* 运行时间计数 */
@@ -91,7 +91,8 @@ struct proc_struct
   unsigned short used_math;         /* 是否使用了协处理器 */
   int tty;
   struct proc_struct * next_ready;  /* 在进程队列的下一个进程 */
-  struct desc_struct ldt[3];        /* 局部描述符表(0-空, 1-代码段, 2-数据段) */
+  /* 局部描述符表(0-空, 1-代码段, 2-数据段) include/kernel/head.h */
+  struct desc_struct ldt[3];
   struct tss_struct tss;            /* 进程的任务状态段信息结构 */
 };
 

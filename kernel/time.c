@@ -93,22 +93,29 @@ void time_init(void)
   outb(inb_p(0x21)&~0x01, 0x21);
 }
 
+/* do_intr_clock: 时钟中断处理程序 */
 void do_intr_clock(long *eip, long error_code, long cpl)
 {
   printa(proc_current->pid);
   println();
   jiffies++;
-  if(jiffies < 15)
-  //由于初始化中断控制芯片时没有采用自动EOI,所以这里需要发指令结束该硬件中断
+  
+  /* 由于初始化中断控制芯片时没有采用自动EOI,所以这里需要发指令结束该硬件中断 */
+  if (jiffies < 15)
     outb(0x20, 0x20);
-  if(cpl)
+
+  if (cpl != 0)
     proc_current->utime++;
-  else
+  else /* cpl == 0 */
     proc_current->stime++;
+
   if((--(proc_current->counter)) > 0)
     return;
+
   proc_current->counter = 0;
-  if(!cpl)
+
+  if(cpl == 0)
     return;
+
   schedule();
 }

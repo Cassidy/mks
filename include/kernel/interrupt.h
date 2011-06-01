@@ -8,6 +8,7 @@
 #ifndef _INTERRUPT_H
 #define _INTERRUPT_H
 
+/* 下面的函数在 kernel/asm.s中定义 */
 extern void intr0();
 extern void intr1();
 extern void intr2();

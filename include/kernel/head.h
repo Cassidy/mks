@@ -13,10 +13,10 @@ struct desc_struct {
   unsigned long a, b;
 };
 
-extern struct desc_struct *idt;
-extern struct desc_struct *gdt;
+extern struct desc_struct *idt; /* kernel/interrupt.c */
+extern struct desc_struct *gdt; /* kernel/proc.c */
 
-extern unsigned long *pg_dir;
+extern unsigned long *pg_dir;   /* kernel/memory.c */
 
 
 #endif

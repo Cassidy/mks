@@ -6,43 +6,44 @@
  */
 
 #include <kernel/kernel.h>
-#include <kernel/proc.h>
+#include <kernel/proc.h>        /* proc_struct, INIT_PROC_DATA */
 #include <asm/system.h>
 
 struct desc_struct *gdt;        /* 全局描述符表的入口地址 */
 
 union proc_union {              /* 进程控制体与其内核态堆栈,总共4KB */
-  struct proc_struct proc;
-  char stack[PAGE_SIZE];
+  struct proc_struct proc;      /* include/kernel/proc.h */
+  char stack[PAGE_SIZE];        /* PAGE_SIZE=4096 (include/kernel/kernel.h) */
 };
 
-struct proc_struct * proc[NR_PROCS];   //所有进程指针
+/* NR_PROCS=64(include/config.h) */
+struct proc_struct * proc[NR_PROCS]; /* 所有进程指针 */
 
-struct proc_struct * task_head;      //任务队列头指针
-struct proc_struct * task_tail;      //任务队列尾指针
-struct proc_struct * server_head;    //服务器队列头指针
-struct proc_struct * server_tail;    //服务器队列尾指针
-struct proc_struct * user_head;      //用户进程队列头指针
-struct proc_struct * user_tail;      //用户进程队列尾指针
-struct proc_struct * proc_current;   //当前进程指针
+struct proc_struct * task_head;    /* 任务队列头指针 */
+struct proc_struct * task_tail;    /* 任务队列尾指针 */
+struct proc_struct * server_head;  /* 服务器队列头指针 */
+struct proc_struct * server_tail;  /* 服务器队列尾指针 */
+struct proc_struct * user_head;    /* 用户进程队列头指针 */
+struct proc_struct * user_tail;    /* 用户进程队列尾指针 */
+struct proc_struct * proc_current; /* 当前进程指针 */
 
-union proc_union init_procs[NR_INIT_PROCS] = 
-  {
-    {INIT_PROC_DATA,},
-  };
+/* NR_INIT_PROCS=3, INIT_PROC_DATA (include/config.h) */
+union proc_union init_procs[NR_INIT_PROCS] = {
+  {INIT_PROC_DATA,},
+};
 
-extern void idle(void);   //idle进程入口
-extern void init_proc(void);   //init进程入口
-extern void system_task(void);   //system进程入口
+extern void idle(void);         /* idle进程入口 (kernel/main.c) */
+extern void init_proc(void);    /* init进程入口 (kernel/init_proc.c) */
+extern void system_task(void);  /* system进程入口 (system_task/system.c) */
+/* kernel/memory.c */
 extern int share_multi_pages(unsigned long from, unsigned long to, long amount);
 
-/*进程初始化*/
+/* 进程初始化 */
 void proc_init(void)
 {
   int i,j;
   unsigned long *pp, *qq;
-
-  struct desc_struct * p;
+  struct desc_struct * p;       /* include/kernel/proc.h */
 
   gdt = GDT_ADDR;               /* GDT_ADDR = 0x6800 */
   for(i=0; i<NR_PROCS; i++)
@@ -50,34 +51,34 @@ void proc_init(void)
   p = gdt + FIRST_TSS_ENTRY;
   for(i=0; i<NR_PROCS*2; i++,p++)
     p->a = p->b = 0;
-  for(i=0; i<NR_INIT_PROCS; i++)
-    {
-      proc[i] = (struct proc_struct *)&(init_procs[i]);
+  for(i=0; i<NR_INIT_PROCS; i++) {
+    proc[i] = (struct proc_struct *)&(init_procs[i]);
 
-      /*******************************************/
-      /**不知为什么,使用不了*proc[i] = *proc[0]方式赋值**/
-      pp = (unsigned long *)proc[i];
-      qq = (unsigned long *)proc[0];
-      for(j=0; j<(PAGE_SIZE>>2); j++)
-        *(pp++) = *(qq++);
-      /*******************************************/
+    /*******************************************/
+    /* FIXME: 不知为什么,使用不了*proc[i] = *proc[0]方式赋值 */
+    pp = (unsigned long *)proc[i];
+    qq = (unsigned long *)proc[0];
+    for(j=0; j<(PAGE_SIZE>>2); j++)
+      *(pp++) = *(qq++);
+    /*******************************************/
 
-      proc[i]->pid = i;
-      proc[i]->tss.esp0 = PAGE_SIZE + (long)proc[i];
-      proc[i]->tss.ldt = LDT(i);
+    proc[i]->pid = i;
+    proc[i]->tss.esp0 = PAGE_SIZE + (long)proc[i];
+    proc[i]->tss.ldt = LDT(i);
 
-      proc[i]->tss.esp = 0x4000000;        /*用户堆栈指针,指向64M末*/
-      proc[i]->tss.ebp = proc[i]->tss.esp;
-      set_tss_desc(gdt + FIRST_TSS_ENTRY + i*2, &(proc[i]->tss));
-      set_ldt_desc(gdt + FIRST_LDT_ENTRY + i*2, &(proc[i]->ldt));      
-      set_ldt_cs_desc((long *)&(proc[i]->ldt[1]), 0x4000000*i, 16384);   //limit=64MK/4K=16*1024=16384
-      set_ldt_ds_desc((long *)&(proc[i]->ldt[2]), 0x4000000*i, 16384);
-      if(i != 0)
-	/* 共享多个物理页面, 线性地址分别分 0 和 0x4000000*i, 共享页面个数为 640KB/4KB=160 */
-	share_multi_pages(0, 0x4000000*i, 160);
-    }
+    proc[i]->tss.esp = 0x4000000;        /*用户堆栈指针,指向64M末*/
+    proc[i]->tss.ebp = proc[i]->tss.esp;
+    set_tss_desc(gdt + FIRST_TSS_ENTRY + i*2, &(proc[i]->tss));
+    set_ldt_desc(gdt + FIRST_LDT_ENTRY + i*2, &(proc[i]->ldt));      
+    set_ldt_cs_desc((long *)&(proc[i]->ldt[1]), 0x4000000*i, 16384);   //limit=64MK/4K=16*1024=16384
+    set_ldt_ds_desc((long *)&(proc[i]->ldt[2]), 0x4000000*i, 16384);
+      
+    /* 共享多个物理页面, 线性地址分别分 0 和 0x4000000*i, 共享页面个数为 640KB/4KB=160 */
+    if(i != 0)
+      share_multi_pages(0, 0x4000000*i, 160);
+  }
 
-  PROC_INIT;       //宏,在config.h中
+  PROC_INIT;                    /* include/config.h */
 
   task_head = task_tail = NULL;
   server_head = server_tail = NULL;
