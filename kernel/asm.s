@@ -21,7 +21,7 @@ intr0:
 intr1:
 	pushl $1
 	jmp no_error_code
-intr2:	
+intr2:
 	pushl $2
 	jmp no_error_code
 intr3:
@@ -77,67 +77,67 @@ intr19:
 	jmp no_error_code
 
 intr32:
-hwintr0:	
+hwintr0:
 	pushl $32
 	jmp no_error_code
 intr33:
-hwintr1:	
+hwintr1:
 	pushl $33
 	jmp no_error_code
 intr34:
-hwintr2:	
+hwintr2:
 	pushl $34
 	jmp no_error_code
 intr35:
-hwintr3:	
+hwintr3:
 	pushl $35
 	jmp no_error_code
 intr36:
-hwintr4:	
+hwintr4:
 	pushl $36
 	jmp no_error_code
 intr37:
-hwintr5:	
+hwintr5:
 	pushl $37
 	jmp no_error_code
 intr38:
-hwintr6:	
+hwintr6:
 	pushl $38
 	jmp no_error_code
 intr39:
-hwintr7:	
+hwintr7:
 	pushl $39
 	jmp no_error_code
 intr40:
-hwintr8:	
+hwintr8:
 	pushl $40
 	jmp no_error_code
 intr41:
-hwintr9:	
+hwintr9:
 	pushl $41
 	jmp no_error_code
 intr42:
-hwintr10:	
+hwintr10:
 	pushl $42
 	jmp no_error_code
 intr43:
-hwintr11:	
+hwintr11:
 	pushl $43
 	jmp no_error_code
 intr44:
-hwintr12:	
+hwintr12:
 	pushl $44
 	jmp no_error_code
 intr45:
-hwintr13:	
+hwintr13:
 	pushl $45
 	jmp no_error_code
 intr46:
-hwintr14:	
+hwintr14:
 	pushl $46
 	jmp no_error_code
 intr47:
-hwintr15:	
+hwintr15:
 	pushl $47
 	jmp no_error_code
 
@@ -169,18 +169,18 @@ intr_msg:
 	popl %edi
 	popl %edx
 	iret
-	
-	
+
+
 intr_kercall:
 	pushl $0x88
-	jmp no_error_code	
+	jmp no_error_code
 
 intr_reserved:
 	pushl $255
 	jmp no_error_code
-	
+
 no_error_code:
-	xchgl %eax, (%esp)
+	xchgl %eax, (%esp) /* 交换eax和esp所指位置的值（eax=向量号 esp=原eax） */
 	pushl %ebx
 	pushl %ecx
 	pushl %edx
@@ -190,13 +190,13 @@ no_error_code:
 	push %ds
 	push %es
 	push %fs
-	
+
 	movl 44(%esp), %edx /* edx = cs */
-	andl $3, %edx /* ??? */
+	andl $3, %edx /* edx: 中断前 cs 的请求特权级 */
 	pushl %edx
-	
-	pushl $0
-	lea 48(%esp), %edx
+
+	pushl $0 /* 错误码为 0 */
+	lea 48(%esp), %edx /* edx = &eip（被中断程序 eip 值的地址，即堆栈指针） */
 	pushl %edx
 	movl $0x10, %edx
 	mov %dx, %ds
@@ -231,7 +231,7 @@ with_error_code:
 	movl 44(%esp), %edx
 	andl $3, %edx
 	pushl %edx
-	
+
 	pushl %eax
 	lea 48(%esp), %eax
 	pushl %eax

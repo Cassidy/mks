@@ -11,13 +11,14 @@
 #define MSG_ANY -1
 #define MSG_HARDWARE -2
 
-#define NR_MSG_HARDWARE 500       //硬件中断消息数量
+#define NR_MSG_HARDWARE 1024    /* 硬件中断消息数量 */
 
+/* 消息结构体 */
 struct msg_struct
 {
-  long src;
-  long dest;
-  long msg;
+  long src;                     /* 消息的源进程 */
+  long dest;                    /* 消息的目的进程 */
+  long msg;                     /* 短消息内容或是长消息指针 */
   struct msg_struct * next;
 };
 

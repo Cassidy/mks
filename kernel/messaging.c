@@ -49,7 +49,7 @@ void msg_init(void)
     }
 }
 
-/*发送小消息处理*/
+/* 发送小消息处理 */
 long small_send(long src, long dest, long * msg)
 {
   struct msg_struct * msg_p = small_receive_head;
@@ -143,7 +143,7 @@ long small_send(long src, long dest, long * msg)
   return 1;
 }
 
-/*接收小消息处理*/
+/* 接收小消息处理 */
 long small_receive(long src, long dest, long * msg)
 {
   struct msg_struct * msg_p = small_send_head;
@@ -374,7 +374,7 @@ long big_receive(long src, long dest, long * msg)
   return 1;
 }
 
-/*消息中断处理函数*/
+/* 消息中断处理函数 */
 long do_intr_msg(long function, long src_dest, long * msg)
 {
   long a;

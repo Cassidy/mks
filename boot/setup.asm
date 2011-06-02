@@ -184,7 +184,7 @@ setup_idt:
         ret
 
         ;; init_8259A: 初始化 8251A 中断控制器
-        ;; 摘自 《Orange'S: 一个操作系统的实现》
+        ;; 摘自 《Orange'S: 一个操作系统的实现》 第三章
 
 init_8259A:
         mov al, 0x11
@@ -217,14 +217,13 @@ init_8259A:
         out 0xa1, al            ; 从 8259， ICW4
         call io_delay
 
-        mov al, 0xfe            ; 0xfe = (1111 1110) 仅仅开启定时器中断
+        mov al, 0xff            ; 0xff = (1111 1111) 屏蔽主 8259 所有中断
         out 0x21, al            ; 主 8259， OCW1
         call io_delay
 
-        mov al, 0xff            ; 0xff = (1111 1111) 屏蔽从 8259 所有中断
         out 0xa1, al            ; 从 8259， OCW1
         call io_delay
-        
+
         ret
 
         ;; io_delay: 延时

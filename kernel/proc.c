@@ -5,14 +5,14 @@
  *********************************************
  */
 
-#include <kernel/kernel.h>
-#include <kernel/proc.h>        /* proc_struct, INIT_PROC_DATA */
-#include <asm/system.h>
+#include <kernel/kernel.h>      /* PAGE_SIZE */
+#include <kernel/proc.h>        /* proc_struct INIT_PROC_DATA ltr lldt */
+#include <asm/system.h>         /* set_tss_desc set_ldt_desc set_ldt_cs_desc set_ldt_ds_desc */
 
 struct desc_struct *gdt;        /* 全局描述符表的入口地址 */
 
 union proc_union {              /* 进程控制体与其内核态堆栈,总共4KB */
-  struct proc_struct proc;      /* include/kernel/proc.h */
+  struct proc_struct proc;      /* proc_struct -- include/kernel/proc.h */
   char stack[PAGE_SIZE];        /* PAGE_SIZE=4096 (include/kernel/kernel.h) */
 };
 
@@ -35,27 +35,27 @@ union proc_union init_procs[NR_INIT_PROCS] = {
 extern void idle(void);         /* idle进程入口 (kernel/main.c) */
 extern void init_proc(void);    /* init进程入口 (kernel/init_proc.c) */
 extern void system_task(void);  /* system进程入口 (system_task/system.c) */
-/* kernel/memory.c */
-extern int share_multi_pages(unsigned long from, unsigned long to, long amount);
+extern int share_multi_pages(unsigned long from, unsigned long to, long amount); /* kernel/memory.c */
 
 /* 进程初始化 */
 void proc_init(void)
 {
   int i,j;
   unsigned long *pp, *qq;
-  struct desc_struct * p;       /* include/kernel/proc.h */
+  struct desc_struct * p;       /* desc_struct -- include/kernel/proc.h */
 
-  gdt = GDT_ADDR;               /* GDT_ADDR = 0x6800 */
+  gdt = GDT_ADDR;               /* GDT_ADDR = 0x6800 (include/config.h) */
   for(i=0; i<NR_PROCS; i++)
     proc[i] = NULL;
   p = gdt + FIRST_TSS_ENTRY;
   for(i=0; i<NR_PROCS*2; i++,p++)
     p->a = p->b = 0;
+
   for(i=0; i<NR_INIT_PROCS; i++) {
     proc[i] = (struct proc_struct *)&(init_procs[i]);
 
     /*******************************************/
-    /* FIXME: 不知为什么,使用不了*proc[i] = *proc[0]方式赋值 */
+    /* 不知为什么,使用不了*proc[i] = *proc[0]方式赋值。使用下面的语句实现 */
     pp = (unsigned long *)proc[i];
     qq = (unsigned long *)proc[0];
     for(j=0; j<(PAGE_SIZE>>2); j++)
@@ -66,12 +66,14 @@ void proc_init(void)
     proc[i]->tss.esp0 = PAGE_SIZE + (long)proc[i];
     proc[i]->tss.ldt = LDT(i);
 
-    proc[i]->tss.esp = 0x4000000;        /*用户堆栈指针,指向64M末*/
+    proc[i]->tss.esp = 0x4000000; /* 用户堆栈指针,指向64M末 */
     proc[i]->tss.ebp = proc[i]->tss.esp;
+
+    /* 以下四个宏函数在 include/asm/system.h 里定义 */
     set_tss_desc(gdt + FIRST_TSS_ENTRY + i*2, &(proc[i]->tss));
     set_ldt_desc(gdt + FIRST_LDT_ENTRY + i*2, &(proc[i]->ldt));      
-    set_ldt_cs_desc((long *)&(proc[i]->ldt[1]), 0x4000000*i, 16384);   //limit=64MK/4K=16*1024=16384
-    set_ldt_ds_desc((long *)&(proc[i]->ldt[2]), 0x4000000*i, 16384);
+    set_ldt_cs_desc((long *)&(proc[i]->ldt[1]), 0x4000000*i, 16384); /* limit=64MK/4K=16*1024=16384 */
+    set_ldt_ds_desc((long *)&(proc[i]->ldt[2]), 0x4000000*i, 16384); /* include/asm/system.h */
       
     /* 共享多个物理页面, 线性地址分别分 0 和 0x4000000*i, 共享页面个数为 640KB/4KB=160 */
     if(i != 0)

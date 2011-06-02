@@ -8,8 +8,7 @@
 #ifndef _TIME_H
 #define _TIME_H
 
-struct tm
-{
+struct tm {
   int tm_sec;
   int tm_min;
   int tm_hour;

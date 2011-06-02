@@ -8,8 +8,8 @@
 #include <kernel/kernel.h>
 #include <kernel/interrupt.h>
 #include <kernel/head.h>
-#include <asm/system.h>
-#include <asm/io.h>
+#include <asm/system.h>         /* set_trap_gate set_system_gate set_intr_gate */
+#include <asm/io.h>             /* outb_p inb_p */
 
 #define INTR_NUM 255
 
@@ -36,8 +36,7 @@ intr_addr_t intr_reserv_enter = &intr_reserved;
 intr_addr_t intr_msg_enter = &intr_msg;
 intr_addr_t intr_kercall_enter = &intr_kercall;
 
-/* intr_table: 中断向量表 */
-intr_proc_t intr_table[INTR_NUM];
+intr_proc_t intr_table[INTR_NUM]; /* 中断向量表 */
 
 void do_intr_parallel(void)
 {
@@ -214,12 +213,7 @@ void intr_init()
   set_system_gate(0x80, intr_msg_enter);     /* 消息中断 */
   set_system_gate(0x88, intr_kercall_enter); /* 内核调用中断 */
 
-  outb_p(inb_p(0x21) & 0xFB, 0x21); /* 允许8259Ａ主芯片的IRQ2中断请求 */
-  outb_p(inb_p(0xA1) & 0xDF, 0xA1); /* 允许8259Ａ从芯片的IRQ13中断请求 */
-  /*
-  outb_p(0x36, 0x43);
-  outb_p(LATCH & 0xFF, 0x40);
-  outb(LATCH >> 8, 0x40);
-  */
+  /* 宏函数(include/asm/io.h)： outb_p(value, port) inb_p(port) */
+  outb_p(inb_p(0x21) & 0xF9, 0x21); /* 开启键盘中断（IRQ1）和接连从芯片（IRQ2） */
 }
 
