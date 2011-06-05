@@ -6,14 +6,14 @@
  */
 
 #include <kernel/kernel.h>
-#include <kernel/messaging.h>
+#include <kernel/messaging.h>   /* msg_struct NR_MSG_HARDWARE */
 #include <kernel/proc.h>
 
-extern struct proc_struct * proc[NR_PROCS];   //所有进程指针
-extern struct proc_struct * proc_current;     //当前进程指针
+extern struct proc_struct * proc[NR_PROCS]; /* 所有进程指针 -- kernel/proc.c */
+extern struct proc_struct * proc_current;   /* 当前进程指针 -- kernel/proc.c */
 
-extern void schedule(void);
-extern void share_page(unsigned long, unsigned long);
+extern void schedule(void);     /* 进程调度 -- kernel/proc.c */
+extern void share_page(unsigned long, unsigned long); /* kernel/memory.c */
 
 struct msg_struct * small_send_head;
 struct msg_struct * small_send_tail;
@@ -24,29 +24,25 @@ struct msg_struct * big_send_tail;
 struct msg_struct * big_receive_head;
 struct msg_struct * big_receive_tail;
 
-struct msg_struct msg_hardware[NR_MSG_HARDWARE];  //硬件中断消息
+/* NR_MSG_HARDWARE=1024 (include/kernel/messaging.h) */
+struct msg_struct msg_hardware[NR_MSG_HARDWARE]; /* 硬件中断消息 */
 
 /* 消息传递初始化 */
 void msg_init(void)
 {
   long i;
   
-  small_send_head = NULL;
-  small_send_tail = NULL;
-  small_receive_head = NULL;
-  small_receive_tail = NULL;
-  big_send_head = NULL;
-  big_send_tail = NULL;
-  big_receive_head = NULL;
-  big_receive_tail = NULL;
+  small_send_head = small_send_tail = NULL;
+  small_receive_head = small_receive_tail =  NULL;
+  big_send_head = big_send_tail = NULL;
+  big_receive_head = big_receive_tail = NULL;
  
-  for(i=0; i<NR_MSG_HARDWARE; i++)
-    {
-      msg_hardware[i].src = 0;
-      msg_hardware[i].dest = 0;
-      msg_hardware[i].msg = 0;
-      msg_hardware[i].next = NULL;
-    }
+  for(i=0; i<NR_MSG_HARDWARE; i++) {
+    msg_hardware[i].src = 0;
+    msg_hardware[i].dest = 0;
+    msg_hardware[i].msg = 0;
+    msg_hardware[i].next = NULL;
+  }
 }
 
 /* 发送小消息处理 */
@@ -63,7 +59,7 @@ long small_send(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->dest && (src==msg_p->src || msg_p->src==MSG_ANY))
-	break;
+        break;
       msg_t = msg_p;
       msg_p = msg_p->next;
     }
@@ -71,11 +67,11 @@ long small_send(long src, long dest, long * msg)
     {
       *((long *)(msg_p->msg)) = *msg;
       if(!msg_t)
-	small_receive_head = msg_p->next;
+        small_receive_head = msg_p->next;
       else
-	msg_t->next = msg_p->next;
+        msg_t->next = msg_p->next;
       if(!msg_p->next)
-	small_receive_tail = msg_t;
+        small_receive_tail = msg_t;
       proc[msg_p->dest]->state = RUNNING;
       schedule();
       return 1;
@@ -85,7 +81,7 @@ long small_send(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->src && src==msg_p->dest)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -93,7 +89,7 @@ long small_send(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->src && src==msg_p->dest)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -101,7 +97,7 @@ long small_send(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->dest && src==msg_p->src)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -110,13 +106,13 @@ long small_send(long src, long dest, long * msg)
     {
       int i;
       for(i=0; i<NR_MSG_HARDWARE; i++)
-	if(msg_hardware[i].src != MSG_HARDWARE)
-	  {
-	    msg_p = &msg_hardware[i];
-	    break;
-	  }
+        if(msg_hardware[i].src != MSG_HARDWARE)
+          {
+            msg_p = &msg_hardware[i];
+            break;
+          }
       if(!msg_p)
-	return -1;
+        return -1;
     }
   else
     {
@@ -157,7 +153,7 @@ long small_receive(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->dest && (src==msg_p->src || src==MSG_ANY))
-	break;
+        break;
       msg_t = msg_p;
       msg_p = msg_p->next;
     }
@@ -165,15 +161,15 @@ long small_receive(long src, long dest, long * msg)
     {
       *msg = msg_p->msg;
       if(!msg_t)
-	small_send_head = msg_p->next;
+        small_send_head = msg_p->next;
       else
-	msg_t->next = msg_p->next;
+        msg_t->next = msg_p->next;
       if(!msg_p->next)
-	small_send_tail = msg_t;
+        small_send_tail = msg_t;
       if(msg_p->src == MSG_HARDWARE)
-	msg_p->src = 0;
+        msg_p->src = 0;
       else
-	proc[msg_p->src]->state = RUNNING;
+        proc[msg_p->src]->state = RUNNING;
       schedule();
       return 1;
     }
@@ -182,7 +178,7 @@ long small_receive(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->src && src==msg_p->dest)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -190,7 +186,7 @@ long small_receive(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->dest && src==msg_p->src)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -198,7 +194,7 @@ long small_receive(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->src && src==msg_p->dest)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -236,7 +232,7 @@ long big_send(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->dest && (src==msg_p->src || msg_p->src==MSG_ANY))
-	break;
+        break;
       msg_t = msg_p;
       msg_p = msg_p->next;
     }
@@ -244,11 +240,11 @@ long big_send(long src, long dest, long * msg)
     {
       share_page((unsigned long)(*msg), (unsigned long)(msg_p->msg));
       if(!msg_t)
-	big_receive_head = msg_p->next;
+        big_receive_head = msg_p->next;
       else
-	msg_t->next = msg_p->next;
+        msg_t->next = msg_p->next;
       if(!msg_p->next)
-	big_receive_tail = msg_t;
+        big_receive_tail = msg_t;
       proc[msg_p->dest]->state = RUNNING;
       schedule();
       return 1;
@@ -258,7 +254,7 @@ long big_send(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->src && src==msg_p->dest)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -266,7 +262,7 @@ long big_send(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->dest && src==msg_p->src)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -274,7 +270,7 @@ long big_send(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->src && src==msg_p->dest)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -312,7 +308,7 @@ long big_receive(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->dest && (src==msg_p->src || src==MSG_ANY))
-	break;
+        break;
       msg_t = msg_p;
       msg_p = msg_p->next;
     }
@@ -320,11 +316,11 @@ long big_receive(long src, long dest, long * msg)
     {
       share_page((unsigned long)(msg_p->msg), (unsigned long)(*msg));
       if(!msg_t)
-	big_send_head = msg_p->next;
+        big_send_head = msg_p->next;
       else
-	msg_t->next = msg_p->next;
+        msg_t->next = msg_p->next;
       if(!msg_p->next)
-	big_send_tail = msg_t;
+        big_send_tail = msg_t;
       proc[msg_p->src]->state = RUNNING;
       schedule();
       return 1;
@@ -334,7 +330,7 @@ long big_receive(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->dest && src==msg_p->src)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -342,7 +338,7 @@ long big_receive(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->src && src==msg_p->dest)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 
@@ -350,7 +346,7 @@ long big_receive(long src, long dest, long * msg)
   while(msg_p)
     {
       if(dest==msg_p->src && src==msg_p->dest)
-	return -1;
+        return -1;
       msg_p = msg_p->next;
     }
 

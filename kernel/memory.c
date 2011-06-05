@@ -27,6 +27,7 @@ void invalidate(void)
   __asm__("movl %%eax, %%cr3"::"a"(pg_dir));
 }
 
+/* 主内存初始化 */
 void mem_init(unsigned long start_mem, unsigned long end_mem)
 {
   int i;
@@ -78,7 +79,7 @@ void do_no_page(unsigned long addr)
     {
       phys_addr = get_free_page();
       if(phys_addr == 0)
-	return;
+    return;
       *page = phys_addr | 7;
     }
 
@@ -114,10 +115,10 @@ void do_intr_page(long *eip, unsigned long error_code)
 {
   unsigned long addr;
 
-  __asm__ (						\
-	   "movl %%cr2, %%eax\n\t"			\
-	   "sti"					\
-	   :"=a"(addr));
+  __asm__ (                     \
+       "movl %%cr2, %%eax\n\t"  \
+       "sti"                    \
+       :"=a"(addr));
 
   if((error_code & 0x1) == 0)
     do_no_page(addr);
@@ -133,21 +134,21 @@ unsigned long get_free_page(void)
   for (i=0 ; i<PAGING_PAGES ; i++)
     {
       if(mem_map[i] == 0)
-	{
-	  if((i & 0x3FF) == 0x3FD)
-	    {
-	      mem_map[i] = 1;
-	      j = create_page_table((unsigned long)((i+2)<<12));
-	      mem_map[i] = 0;
-	      if(j == -1)
-		return 0;
-	    }
-	  p = (unsigned long *)(i << 12);
-	  for(j=0; j<(PAGE_SIZE/4); j++)
-	    *(p++) = 0;
-	  mem_map[i] = 1;
-	  return (unsigned long)(i<<12);
-	}
+    {
+      if((i & 0x3FF) == 0x3FD)
+        {
+          mem_map[i] = 1;
+          j = create_page_table((unsigned long)((i+2)<<12));
+          mem_map[i] = 0;
+          if(j == -1)
+        return 0;
+        }
+      p = (unsigned long *)(i << 12);
+      for(j=0; j<(PAGE_SIZE/4); j++)
+        *(p++) = 0;
+      mem_map[i] = 1;
+      return (unsigned long)(i<<12);
+    }
     }
 
   return 0;
@@ -181,23 +182,20 @@ void share_page(unsigned long from, unsigned long to)
   unsigned long page;
 
   from_table = (unsigned long *)((unsigned long)pg_dir + ((from>>20)&0xFFC));
-  while(!((*from_table) & 1))
-    {
-      do_no_page(from);
-      from_table = (unsigned long *)((unsigned long)pg_dir + ((from>>20)&0xFFC));
-    }
+  while(!((*from_table) & 1)) {
+    do_no_page(from);
+    from_table = (unsigned long *)((unsigned long)pg_dir + ((from>>20)&0xFFC));
+  }
   from_page = (unsigned long*)(((*from_table)&0xFFFFF000) + ((from>>10)&0xFFC));
-  while(!((*from_page) & 1))
-    {
-      do_no_page(from);
-      from_page = (unsigned long *)(((*from_table)&0xFFFFF000) + ((from>>10)&0xFFC));
-    }
+  while(!((*from_page) & 1)) {
+    do_no_page(from);
+    from_page = (unsigned long *)(((*from_table)&0xFFFFF000) + ((from>>10)&0xFFC));
+  }
   to_table = (unsigned long *)((unsigned long)pg_dir + ((to>>20)&0xFFC));
-  while(!((*to_table) & 1))
-    {
-      create_page_table(to);
-      to_table = (unsigned long *)((unsigned long)pg_dir + ((to>>20)&0xFFC));
-    }
+  while(!((*to_table) & 1)) {
+    create_page_table(to);
+    to_table = (unsigned long *)((unsigned long)pg_dir + ((to>>20)&0xFFC));
+  }
   to_page = (unsigned long *)(((*to_table)&0xFFFFF000) + ((to>>10)&0xFFC));
 
   page = *from_page;
@@ -215,11 +213,12 @@ int share_multi_pages(unsigned long from, unsigned long to, long amount)
 {
   if((from&0xFFF) || (to&0xFFF))
     return -1;
-  while(amount--)
-    {
-      share_page(from, to);
-      from += 0x1000;
-      to += 0x1000;
-    }
+
+  while(amount--) {
+    share_page(from, to);
+    from += 0x1000;
+    to += 0x1000;
+  }
+
   return 1;
 }

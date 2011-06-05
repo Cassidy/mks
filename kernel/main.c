@@ -6,7 +6,7 @@
  */
 
 #include <kernel/kernel.h>
-#include <asm/system.h>
+#include <asm/system.h>         /* sti move_to_user_mode */
 
 #define MEM_SIZE (*(unsigned long *)0x90000) /* RAM 内存总量 */
 
@@ -46,8 +46,8 @@ void main(void)
   proc_init();                /* 进程初始化(kernel/proc.c) */
   msg_init();                 /* 消息传递初始化(kernel/messaging.c) */
 
-  sti();
-  move_to_user_mode();
+  sti();                        /* include/asm/system.h */
+  move_to_user_mode();          /* include/asm/system.h */
   idle();
 }
 
