@@ -112,28 +112,69 @@ struct proc_struct {
       "d"(TSS(n)), "c"((long)proc[n]));         \
   }
 
-#define INIT_PROC_DATA                          \
-  {0, 0, 0,                                     \
-      0, 0, 0, 0, 0, 0,                         \
-      0, -1, 0, 0, 0,                           \
-      0, 0, 0, 0, 0, 0,                         \
-      0, 0, 0, 0, 0, 0,                         \
-      0,                                        \
-      -1,                                       \
-      NULL,                                     \
-        {                                       \
-          {0, 0},                               \
-            {0, 0},                             \
-              {0, 0}                            \
-        },                                      \
-          {0, 0, 0x10,                          \
-              0, 0, 0, 0,                       \
-              PAGE_DIR_ADDR,                    \
-              0, 0, 0, 0, 0,                    \
-              0, 0, 0, 0, 0,                    \
-              0x17,0x0F,0x17,0x17,0x17,0x17,    \
-              0, 0x80000000,                    \
-              {}                                \
-          }    }
+#define INIT_PROC_DATA                                  \
+  {0,                           /* proc_type */         \
+    0,                          /* state */             \
+    0,                          /* counter */           \
+    0,                          /* exit_code */         \
+    0,                          /* start_code */        \
+    0,                          /* end_code */          \
+    0,                          /* end_data */          \
+    0,                          /* brk */               \
+    0,                          /* start_stack */       \
+    0,                          /* pid */               \
+    -1,                         /* father */            \
+    0,                          /* pgrp */              \
+    0,                          /* session */           \
+    0,                          /* leader */            \
+    0,                          /* uid */               \
+    0,                          /* euid */              \
+    0,                          /* suid */              \
+    0,                          /* gid */               \
+    0,                          /* egid */              \
+    0,                          /* sgid */              \
+    0,                          /* alarm */             \
+    0,                          /* utime */             \
+    0,                          /* stime */             \
+    0,                          /* cutime */            \
+    0,                          /* cstime */            \
+    0,                          /* start_time */        \
+    0,                          /* used_math */         \
+    -1,                         /* tty */               \
+    NULL,                       /* next_reader */       \
+                                                        \
+   /* ldt */                                            \
+  {{0,0},{0,0},{0,0}},                                  \
+                                                        \
+   /* tss */                                            \
+    {                                                   \
+    0,                          /* back_link */         \
+    0,                          /* esp0 */              \
+    0x10,                       /* ss0 */               \
+    0,                          /* esp1 */              \
+    0,                          /* ss1 */               \
+    0,                          /* esp2 */              \
+    0,                          /* ss2 */               \
+    PAGE_DIR_ADDR,              /* cr3 */               \
+    0,                          /* eip */               \
+    0,                          /* eflags */            \
+    0,                          /* eax */               \
+    0,                          /* ecx */               \
+    0,                          /* edx */               \
+    0,                          /* ebx */               \
+    0,                          /* esp */               \
+    0,                          /* ebp */               \
+    0,                          /* esi */               \
+    0,                          /* edi */               \
+    0x17,                       /* es */                \
+    0x0F,                       /* cs */                \
+    0x17,                       /* ss */                \
+    0x17,                       /* ds */                \
+    0x17,                       /* fs */                \
+    0x17,                       /* gs */                \
+    0,                          /* ldt */               \
+    0x80000000,                 /* trace_bitmap */      \
+  {}                            /* i387 */              \
+    }}
 
 #endif

@@ -1,6 +1,6 @@
         ;; Program: setup32.asm
         ;; Purpose: 因为是在 32 位保护模式下，重新设置 IDT，GDT，然后开启分页，
-        ;;          最后跳转到 main.c 中执行
+        ;;          最后跳转到 kernel_start.asm 中执行
         ;; Author:  mofaph <mofaph@gmail.com>
         ;; Date:    2011/5/2 18:52
 
@@ -21,9 +21,9 @@
 setup32_start:
         mov eax, 0x10
         mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
+        mov es, ax
+        mov fs, ax
+        mov gs, ax
         mov ss, ax
         mov esp, 0x9f000
 
@@ -35,9 +35,9 @@ setup32_start:
 reload_segment:
         mov eax, 0x10           ; 0x10 指向新的数据段描述符
         mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
+        mov es, ax
+        mov fs, ax
+        mov gs, ax
         mov ss, ax
         mov esp, 0x9f000
 
