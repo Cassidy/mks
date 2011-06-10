@@ -8,6 +8,7 @@
 #ifndef _PRINTK_H
 #define _PRINTK_H
 
+/* 以下的函数都在 kernel/printk.c 中定义 */
 extern void con_init(void);                /* 显示初始化 */
 extern int printk(const char *);           /* 输出字符串 */
 extern int prints(const char *);           /* 输出字符串 */
