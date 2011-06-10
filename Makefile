@@ -16,7 +16,8 @@ LDFLAGS =-m elf_i386 -T kernel.lds -s -x
 CFLAGS	=-Wall -fomit-frame-pointer
 CPP	=cpp -nostdinc -Iinclude
 
-ARCHIVES=kernel/kernel.o init_proc/init_proc.o system_task/system_task.o
+ARCHIVES=kernel/kernel.o init_proc/init_proc.o system_task/system_task.o \
+         driver/driver.o
 LIBS	=lib/lib.a
 
 .PHONY: all Image system clean burn purge
@@ -64,6 +65,8 @@ init_proc/init_proc.o:
 	(cd init_proc; make)
 lib/lib.a:
 	(cd lib; make)
+driver/driver.o:
+	(cd driver; make)
 
 boot/setup32: boot/setup32.asm
 	$(NASM) $(NASMFLAGS) -f bin $< -o $@
@@ -81,6 +84,7 @@ clean:
 	(cd system_task; make clean)
 	(cd init_proc; make clean)
 	(cd lib; make clean)
+	(cd driver; make clean)
 
 purge: clean
 	make clean
