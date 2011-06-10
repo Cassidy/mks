@@ -5,6 +5,7 @@
 # build/ 忽略 build/ 目录下的文件
 # doc/*.txt 忽略 doc/notes.txt 但不包括 doc/server/arch.txt
 
+TAGS
 bootsect*
 !bootsect.asm
 simple-boot.asm
