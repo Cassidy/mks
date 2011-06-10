@@ -1,7 +1,7 @@
 /*********************************************
  * File name: time.c
  * Author: Cassidy
- * Time-stamp: <2011-05-29 20:13:38>
+ * Time-stamp: <2011-06-10 16:24:00>
  *********************************************
  */
 
@@ -113,13 +113,10 @@ void time_init(void)
 /* do_intr_clock: 时钟中断处理程序 */
 void do_intr_clock(long *eip, long error_code, long cpl)
 {
-  printa(proc_current->pid);
-  println();
   jiffies++;
-  
+
   /* 由于初始化中断控制芯片时没有采用自动EOI,所以这里需要发指令结束该硬件中断 */
-  if (jiffies < 15)
-    outb(0x20, 0x20);
+  outb(0x20, 0x20);
 
   if (cpl != 0)
     proc_current->utime++;

@@ -1,7 +1,7 @@
 /*********************************************
  * File name: system.c
  * Author: Cassidy
- * Time-stamp: <2011-05-19 18:54:53>
+ * Time-stamp: <2011-06-10 14:56:05>
  *********************************************
  */
 
@@ -10,11 +10,10 @@
 void system_task(void)
 {
   struct Msg msg;
-  long *p = get_msg_entry(&msg);
-  *p = 20;
-  big_msg_send(1, &msg);
-  big_msg_receive(1, &msg);
-
-  for(;;)
-    ;
+  long src = MSG_ANY;
+  while(1)
+    {
+      big_msg_receive(&src, &msg);
+      src = MSG_ANY;
+    }
 }
