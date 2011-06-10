@@ -1,7 +1,7 @@
 /*********************************************
  * File name: asm.s
  * Author: Cassidy
- * Time-stamp: <2011-05-12 23:19:09>
+ * Time-stamp: <2011-06-10 12:46:00>
  *********************************************
  */
 
@@ -155,11 +155,14 @@ intr_msg:
 	mov %dx, %fs
 	pushl %ecx
 	movl %esp, %ecx
+	pushl %ebx
+	movl %esp, %ebx
 	pushl %ecx
 	pushl %ebx
 	pushl %eax
 	call do_intr_msg
 	addl $12, %esp
+	popl %ebx
 	popl %ecx
 	pop %fs
 	pop %es

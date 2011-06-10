@@ -1,7 +1,7 @@
 /*********************************************
  * File name: messaging.c
  * Author: Cassidy
- * Time-stamp: <2011-05-30 15:01:20>
+ * Time-stamp: <2011-06-10 14:59:36>
  *********************************************
  */
 
@@ -50,19 +50,20 @@ void msg_init(void)
 }
 
 /*发送小消息处理*/
-long small_send(long src, long dest, long * msg)
+long small_send(long src, long * dest, long * msg)
 {
   struct msg_struct * msg_p = small_receive_head;
   struct msg_struct * msg_t = NULL;
 
   if((src<0 && src!=MSG_HARDWARE) || src>=NR_PROCS)
     return -1;
-  if(dest < 0 || dest >= NR_PROCS)
+  if(*dest < 0 || *dest >= NR_PROCS)
     return -1;
 
   while(msg_p)
     {
-      if(dest==msg_p->dest && (src==msg_p->src || msg_p->src==MSG_ANY))
+      if(*dest==msg_p->dest &&
+	 (src==*((long *)(msg_p->src)) || *((long *)(msg_p->src))==MSG_ANY))
 	break;
       msg_t = msg_p;
       msg_p = msg_p->next;
@@ -70,6 +71,8 @@ long small_send(long src, long dest, long * msg)
   if(msg_p)
     {
       *((long *)(msg_p->msg)) = *msg;
+      if(*((long *)(msg_p->src)) == MSG_ANY)
+	*((long *)(msg_p->src)) = src;
       if(!msg_t)
 	small_receive_head = msg_p->next;
       else
@@ -84,7 +87,7 @@ long small_send(long src, long dest, long * msg)
   msg_p = small_send_head;
   while(msg_p)
     {
-      if(dest==msg_p->src && src==msg_p->dest)
+      if(*dest==msg_p->src && src==msg_p->dest)
 	return -1;
       msg_p = msg_p->next;
     }
@@ -92,7 +95,7 @@ long small_send(long src, long dest, long * msg)
   msg_p = big_send_head;
   while(msg_p)
     {
-      if(dest==msg_p->src && src==msg_p->dest)
+      if(*dest==msg_p->src && src==msg_p->dest)
 	return -1;
       msg_p = msg_p->next;
     }
@@ -100,7 +103,7 @@ long small_send(long src, long dest, long * msg)
   msg_p = big_receive_head;
   while(msg_p)
     {
-      if(dest==msg_p->dest && src==msg_p->src)
+      if(*dest==msg_p->dest && src==*((long *)(msg_p->src)))
 	return -1;
       msg_p = msg_p->next;
     }
@@ -125,7 +128,7 @@ long small_send(long src, long dest, long * msg)
     }
 
   msg_p->src = src;
-  msg_p->dest = dest;
+  msg_p->dest = *dest;
   msg_p->msg = *msg;
   msg_p->next = NULL;
 
@@ -144,19 +147,19 @@ long small_send(long src, long dest, long * msg)
 }
 
 /*接收小消息处理*/
-long small_receive(long src, long dest, long * msg)
+long small_receive(long * src, long dest, long * msg)
 {
   struct msg_struct * msg_p = small_send_head;
   struct msg_struct * msg_t = NULL;
 
-  if((src<0 && src!=MSG_ANY && src!=MSG_HARDWARE) || src>=NR_PROCS)
+  if((*src<0 && *src!=MSG_ANY && *src!=MSG_HARDWARE) || *src>=NR_PROCS)
     return -1;
   if(dest < 0 || dest >= NR_PROCS)
     return -1;
 
   while(msg_p)
     {
-      if(dest==msg_p->dest && (src==msg_p->src || src==MSG_ANY))
+      if(dest==msg_p->dest && (*src==msg_p->src || *src==MSG_ANY))
 	break;
       msg_t = msg_p;
       msg_p = msg_p->next;
@@ -164,6 +167,8 @@ long small_receive(long src, long dest, long * msg)
   if(msg_p)
     {
       *msg = msg_p->msg;
+      if(*src == MSG_ANY)
+	*src = msg_p->src;
       if(!msg_t)
 	small_send_head = msg_p->next;
       else
@@ -181,7 +186,7 @@ long small_receive(long src, long dest, long * msg)
   msg_p = small_receive_head;
   while(msg_p)
     {
-      if(dest==msg_p->src && src==msg_p->dest)
+      if(dest==*((long *)(msg_p->src)) && *src==msg_p->dest)
 	return -1;
       msg_p = msg_p->next;
     }
@@ -189,7 +194,7 @@ long small_receive(long src, long dest, long * msg)
   msg_p = big_send_head;
   while(msg_p)
     {
-      if(dest==msg_p->dest && src==msg_p->src)
+      if(dest==msg_p->dest && *src==msg_p->src)
 	return -1;
       msg_p = msg_p->next;
     }
@@ -197,14 +202,14 @@ long small_receive(long src, long dest, long * msg)
   msg_p = big_receive_head;
   while(msg_p)
     {
-      if(dest==msg_p->src && src==msg_p->dest)
+      if(dest==*((long *)(msg_p->src)) && *src==msg_p->dest)
 	return -1;
       msg_p = msg_p->next;
     }
 
   struct msg_struct new_msg;
   msg_p = &new_msg;
-  msg_p->src = src;
+  msg_p->src = (long)src;
   msg_p->dest = dest;
   msg_p->msg = (long)msg;
   msg_p->next = NULL;
@@ -223,19 +228,20 @@ long small_receive(long src, long dest, long * msg)
 }
 
 /* 发送大消息处理 */
-long big_send(long src, long dest, long * msg)
+long big_send(long src, long * dest, long * msg)
 {
   struct msg_struct * msg_p = big_receive_head;
   struct msg_struct * msg_t = NULL;
 
   if(src < 0 || src >= NR_PROCS)
     return -1;
-  if(dest < 0 || dest >= NR_PROCS)
+  if(*dest < 0 || *dest >= NR_PROCS)
     return -1;
 
   while(msg_p)
     {
-      if(dest==msg_p->dest && (src==msg_p->src || msg_p->src==MSG_ANY))
+      if(*dest==msg_p->dest &&
+	 (src==*((long *)(msg_p->src)) || *((long *)(msg_p->src))==MSG_ANY))
 	break;
       msg_t = msg_p;
       msg_p = msg_p->next;
@@ -243,6 +249,8 @@ long big_send(long src, long dest, long * msg)
   if(msg_p)
     {
       share_page((unsigned long)(*msg), (unsigned long)(msg_p->msg));
+      if(*((long *)(msg_p->src)) == MSG_ANY)
+	*((long *)(msg_p->src)) = src;
       if(!msg_t)
 	big_receive_head = msg_p->next;
       else
@@ -265,7 +273,7 @@ long big_send(long src, long dest, long * msg)
   msg_p = small_receive_head;
   while(msg_p)
     {
-      if(dest==msg_p->dest && src==msg_p->src)
+      if(dest==msg_p->dest && src==*((long *)(msg_p->src)))
 	return -1;
       msg_p = msg_p->next;
     }
@@ -281,7 +289,7 @@ long big_send(long src, long dest, long * msg)
   struct msg_struct new_msg;
   msg_p = &new_msg;
   msg_p->src = src;
-  msg_p->dest = dest;
+  msg_p->dest = *dest;
   msg_p->msg = *msg;
   msg_p->next = NULL;
 
@@ -299,19 +307,19 @@ long big_send(long src, long dest, long * msg)
 }
 
 /* 接收大消息处理 */
-long big_receive(long src, long dest, long * msg)
+long big_receive(long * src, long dest, long * msg)
 {
   struct msg_struct * msg_p = big_send_head;
   struct msg_struct * msg_t = NULL;
 
-  if((src<0 && src!=MSG_ANY) || src>=NR_PROCS)
+  if((*src<0 && *src!=MSG_ANY) || *src>=NR_PROCS)
     return -1;
   if(dest < 0 || dest >= NR_PROCS)
     return -1;
 
   while(msg_p)
     {
-      if(dest==msg_p->dest && (src==msg_p->src || src==MSG_ANY))
+      if(dest==msg_p->dest && (*src==msg_p->src || *src==MSG_ANY))
 	break;
       msg_t = msg_p;
       msg_p = msg_p->next;
@@ -319,6 +327,8 @@ long big_receive(long src, long dest, long * msg)
   if(msg_p)
     {
       share_page((unsigned long)(msg_p->msg), (unsigned long)(*msg));
+      if(*src == MSG_ANY)
+	*src = msg_p->src;
       if(!msg_t)
 	big_send_head = msg_p->next;
       else
@@ -333,7 +343,7 @@ long big_receive(long src, long dest, long * msg)
   msg_p = small_send_head;
   while(msg_p)
     {
-      if(dest==msg_p->dest && src==msg_p->src)
+      if(dest==msg_p->dest && *src==msg_p->src)
 	return -1;
       msg_p = msg_p->next;
     }
@@ -341,7 +351,7 @@ long big_receive(long src, long dest, long * msg)
   msg_p = small_receive_head;
   while(msg_p)
     {
-      if(dest==msg_p->src && src==msg_p->dest)
+      if(dest==*((long *)(msg_p->src)) && *src==msg_p->dest)
 	return -1;
       msg_p = msg_p->next;
     }
@@ -349,14 +359,14 @@ long big_receive(long src, long dest, long * msg)
   msg_p = big_receive_head;
   while(msg_p)
     {
-      if(dest==msg_p->src && src==msg_p->dest)
+      if(dest==*((long *)(msg_p->src)) && *src==msg_p->dest)
 	return -1;
       msg_p = msg_p->next;
     }
 
   struct msg_struct new_msg;
   msg_p = &new_msg;
-  msg_p->src = src;
+  msg_p->src = (long)src;
   msg_p->dest = dest;
   msg_p->msg = *msg;
   msg_p->next = NULL;
@@ -375,20 +385,15 @@ long big_receive(long src, long dest, long * msg)
 }
 
 /*消息中断处理函数*/
-long do_intr_msg(long function, long src_dest, long * msg)
+long do_intr_msg(long function, long * src_dest, long * msg)
 {
   long a;
   long cur_pid = proc_current->pid;
   long entry;
-  if(cur_pid == src_dest)
+  if(cur_pid == *src_dest)
     return -1;   //消息传递失败
   if(function == 1)
-    {
-      //      a = small_send(cur_pid, src_dest, msg);
-      printa(*msg);
-      println();
-      return 1;
-    }
+    a = small_send(cur_pid, src_dest, msg);
   else if(function == 2)
     a = small_receive(src_dest, cur_pid, msg);
   else if(function == 3)

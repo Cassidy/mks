@@ -1,7 +1,7 @@
 /*********************************************
  * File name: proc.c
  * Author: Cassidy
- * Time-stamp: <2011-05-29 20:50:40>
+ * Time-stamp: <2011-06-03 01:51:52>
  *********************************************
  */
 
@@ -59,7 +59,7 @@ void proc_init(void)
       pp = (unsigned long *)proc[i];
       qq = (unsigned long *)proc[0];
       for(j=0; j<(PAGE_SIZE>>2); j++)
-        *(pp++) = *(qq++);
+	*(pp++) = *(qq++);
       /*******************************************/
 
       proc[i]->pid = i;

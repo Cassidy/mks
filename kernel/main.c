@@ -1,7 +1,7 @@
 /*********************************************
  * File name: main.c
  * Author: Cassidy
- * Time-stamp: <2011-05-29 20:12:51>
+ * Time-stamp: <2011-06-05 03:16:38>
  *********************************************
  */
 
@@ -37,10 +37,9 @@ void main(void)
     buffer_memory_end = 2*1024*1024;
   else /* 1M < memory_end && memory_end <= 6M */
     buffer_memory_end = 1*1024*1024;        //否则设置缓冲区末端=1MB
-
   main_memory_start = buffer_memory_end;    //主内存起始位置=缓冲区末端
 
-  mem_init(main_memory_start, memory_end);   //主内存初始化(mm/memory.c)
+  mem_init(main_memory_start, memory_end);   //主内存初始化(kernel/memory.c)
   intr_init();    //中断初始化(kernel/interrupt.c)
   time_init();    //时间初始化(kernel/time.c)
   proc_init();    //进程初始化(kernel/proc.c)
