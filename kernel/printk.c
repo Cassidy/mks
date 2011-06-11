@@ -161,6 +161,24 @@ void printhex(unsigned char c) {
   }
 }
 
+/* printchar: 打印字符，供其他程序调用 */
+void printchar(unsigned char c) {
+  pos = ORIG + (video_num_columns * y + x) * 2;
+  (*(char *)pos)       = c;
+  (*(char *)(pos + 1)) = attr;
+  ++x;
+
+  if (x >= 80) {
+    x = 0;
+    ++y;
+  }
+
+  if (y >= 25) {
+    y = 1;
+    x = 0;
+  }
+}
+
 /* 内核输出函数,暂时使用prints(输出字符串) */
 int printk(const char *fmt)
 {
