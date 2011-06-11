@@ -5,13 +5,13 @@
  *********************************************
  */
 
-#define ORIG  0xb8000        //显存首地址
-static unsigned long video_num_columns = 80;   //屏幕文本列数
-static unsigned long pos;            //显示内存一位置
-static unsigned long x,y;            //当前光标位置
-static unsigned char attr = 0x07;    //字符属性(黑底白字)
+#define ORIG  0xb8000                        /* 显存首地址 */
+static unsigned long video_num_columns = 80; /* 屏幕文本列数 */
+static unsigned long pos;                    /* 显示内存一位置 */
+static unsigned long x,y;                    /* 当前光标位置 */
+static unsigned char attr = 0x07;            /* 字符属性(黑底白字) */
 
-/*显示初始化*/
+/* 显示初始化 */
 void con_init()
 {
   x = 0;
@@ -23,25 +23,28 @@ void con_init()
     *ph++ = 32;                 /* 显示空字符 */
     *ph++ = attr;               /* 黑底白字 */
   }
+
+  printk("                  MKS -- Micro Kernel for Study                   ");
 }
 
-/*输出一字符,光标位置进一*/
+/* 输出一字符,光标位置进一 */
 static inline void write_char(char ch)
 {
   pos = ORIG + video_num_columns * 2 * y + x * 2;
   *((char *)pos) = ch;
   *((char *)(pos+1)) = attr;
   x++;
-  if(x >= 80)
-    {    
+  if(x >= 80) {
       y += x / 80;
       x = x % 80;
-    }
-  if(y >= 25)
+  }
+  if(y >= 25) {
+    con_init();
     y = y % 25;
+  }
 }
 
-/*光标移至下一行开头*/
+/* 光标移至下一行开头 */
 void println(void)
 {
   char * ph = ORIG + video_num_columns * 2 * y + x * 2; //原光标位置
@@ -51,48 +54,45 @@ void println(void)
 
   if(y < 25)
     pe = ORIG + video_num_columns * 2 * (y + 1);
-  else
-    {
-      //先清除屏幕的第一行
-      char * ph1 = ORIG;
-      char * pe1 = ORIG + video_num_columns * 2;
-      while(ph1 < pe1)
-	{
+  else {
+    /* 先清除屏幕的第一行 */
+    char * ph1 = ORIG;
+    char * pe1 = ORIG + video_num_columns * 2;
+
+    while(ph1 < pe1) {
 	  *ph1 = 32;
 	  ph1++;
 	  *ph1 = attr;
 	  ph1++;
 	}
-      /////////
 
-      pe = ORIG + video_num_columns * 2 * y;
-      y = 0;
-    }
+    pe = ORIG + video_num_columns * 2 * y;
+    y = 0;
+  }
 
-  while(ph < pe)
-    {
-      *ph = 32;
-      ph++;
-      *ph = attr;
-      ph++;
-      }
+  while(ph < pe) {
+    *ph = 32;
+    ph++;
+    *ph = attr;
+    ph++;
+  }
 }
 
-/*输出字符串,返回输出字符个数*/
+/* 输出字符串,返回输出字符个数 */
 int prints(const char *fmt)
 {
   int i;
   char * ps = fmt;
-  for(i=0; *ps!='\0'; i++)
-    {
-      write_char(*ps);
-      ps++;
-    }
+
+  for(i=0; *ps!='\0'; i++) {
+    write_char(*ps);
+    ps++;
+  }
 
   return i;
 }
 
-/*将十进制数每位转为字符输出*/
+/* 将十进制数每位转为字符输出 */
 static inline void print_charina(unsigned long a)
 {
   unsigned long b, c;
@@ -106,7 +106,7 @@ static inline void print_charina(unsigned long a)
   write_char((char)c);
 }
 
-/*输出长整型娈量*/
+/* 输出长整型娈量 */
 void printa(const long a)
 {
   unsigned long b = (unsigned long)a;
@@ -123,22 +123,45 @@ void printa(const long a)
     print_charina(c);
 }
 
-/*输出二进制数*/
+/* 输出二进制数 */
 void printbin(const unsigned long el)
 {
   int i;
   unsigned long ef = el;
-  for(i=32; i>0; i--)
-    {
-      if(ef & 0x80000000)
-	write_char(49);
-      else
-	write_char(48);
-      ef = ef << 1;
-    }
+
+  for(i=32; i>0; i--) {
+    if(ef & 0x80000000)
+      write_char(49);
+    else
+      write_char(48);
+    ef = ef << 1;
+  }
 }
 
-/*内核输出函数,暂时使用prints(输出字符串)*/
+/* printhex: 输出十六进制数 */
+void printhex(unsigned char c) {
+  int i;
+  unsigned char tmp;
+
+  write_char(48);               /* '0' */
+  write_char(120);              /* 'x' */
+
+  for (i = 0; i < 2; ++i) {
+    c = (c << 4) | (c >> 4);    /* 右旋 4 位 */
+    tmp = c & 0x0F;
+
+    if (tmp > 9)
+      tmp = tmp - 10 + 'A';
+    else if (0 <= tmp && tmp <= 9)
+      tmp = tmp + '0';
+    else /* error */
+      printk("error");
+
+    write_char(tmp);
+  }
+}
+
+/* 内核输出函数,暂时使用prints(输出字符串) */
 int printk(const char *fmt)
 {
   int a;

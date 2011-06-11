@@ -19,6 +19,7 @@ typedef void (*intr_proc_t)(void);
 
 extern void do_intr_clock(long *, long, long);   /* kernel/time.c */
 extern void do_intr_page(long *, unsigned long); /* kernel/memory.c */
+extern void do_intr_keyboard(void);              /* driver/character/keyboard.c */
 
 struct desc_struct *idt;              /* 定义指向中断描述符表的指针 */
 
@@ -32,8 +33,8 @@ intr_addr_t hwintr_enter[16] = {
   &hwintr6, &hwintr7, &hwintr8, &hwintr9, &hwintr10, &hwintr11,
   &hwintr12, &hwintr13, &hwintr14, &hwintr15
 };
-intr_addr_t intr_reserv_enter = &intr_reserved;
-intr_addr_t intr_msg_enter = &intr_msg;
+intr_addr_t intr_reserv_enter  = &intr_reserved;
+intr_addr_t intr_msg_enter     = &intr_msg;
 intr_addr_t intr_kercall_enter = &intr_kercall;
 
 intr_proc_t intr_table[INTR_NUM]; /* 中断向量表 */
@@ -138,62 +139,63 @@ void intr_init()
     intr_table[i] = &do_intr_reserved;
 
   /* 设置特定的中断向量 */
-  intr_table[13] = &do_intr_debug2;
-  intr_table[14] = &do_intr_page;
-  intr_table[32] = &do_intr_clock;
-  intr_table[39] = &do_intr_parallel;
+  intr_table[13]   = &do_intr_debug2;
+  intr_table[14]   = &do_intr_page;
+  intr_table[32]   = &do_intr_clock;
+  intr_table[33]   = &do_intr_keyboard;
+  intr_table[39]   = &do_intr_parallel;
   intr_table[0x88] = &do_intr_kercall;
 
-  intr_table[10] = &do_intr_10;
-  intr_table[11] = &do_intr_11;
-  intr_table[12] = &do_intr_12;
+  intr_table[10]   = &do_intr_10;
+  intr_table[11]   = &do_intr_11;
+  intr_table[12]   = &do_intr_12;
   /* intr_table[13] = &do_intr_debug2; */
   /* intr_table[14] = &do_intr_page; */
-  intr_table[15] = &do_intr_15;
-  intr_table[16] = &do_intr_16;
-  intr_table[17] = &do_intr_17;
-  intr_table[18] = &do_intr_18;
-  intr_table[19] = &do_intr_19;
-  intr_table[20] = &do_intr_20;
-  intr_table[21] = &do_intr_21;
-  intr_table[22] = &do_intr_22;
-  intr_table[23] = &do_intr_23;
-  intr_table[24] = &do_intr_24;
-  intr_table[25] = &do_intr_25;
-  intr_table[26] = &do_intr_26;
-  intr_table[27] = &do_intr_27;
-  intr_table[28] = &do_intr_28;
-  intr_table[29] = &do_intr_29;
-  intr_table[30] = &do_intr_30;
-  intr_table[31] = &do_intr_31;
+  intr_table[15]   = &do_intr_15;
+  intr_table[16]   = &do_intr_16;
+  intr_table[17]   = &do_intr_17;
+  intr_table[18]   = &do_intr_18;
+  intr_table[19]   = &do_intr_19;
+  intr_table[20]   = &do_intr_20;
+  intr_table[21]   = &do_intr_21;
+  intr_table[22]   = &do_intr_22;
+  intr_table[23]   = &do_intr_23;
+  intr_table[24]   = &do_intr_24;
+  intr_table[25]   = &do_intr_25;
+  intr_table[26]   = &do_intr_26;
+  intr_table[27]   = &do_intr_27;
+  intr_table[28]   = &do_intr_28;
+  intr_table[29]   = &do_intr_29;
+  intr_table[30]   = &do_intr_30;
+  intr_table[31]   = &do_intr_31;
   /* intr_table[32] = &do_intr_clock; */
-  intr_table[33] = &do_intr_33;
-  intr_table[34] = &do_intr_34;
-  intr_table[35] = &do_intr_35;
-  intr_table[36] = &do_intr_36;
-  intr_table[37] = &do_intr_37;
-  intr_table[38] = &do_intr_38;
+  /* intr_table[33]   = &do_intr_keyboard; */
+  intr_table[34]   = &do_intr_34;
+  intr_table[35]   = &do_intr_35;
+  intr_table[36]   = &do_intr_36;
+  intr_table[37]   = &do_intr_37;
+  intr_table[38]   = &do_intr_38;
   /* intr_table[39] = &do_intr_parallel; */
-  intr_table[40] = &do_intr_40;
-  intr_table[41] = &do_intr_41;
-  intr_table[42] = &do_intr_42;
-  intr_table[43] = &do_intr_43;
-  intr_table[44] = &do_intr_44;
-  intr_table[45] = &do_intr_45;
-  intr_table[46] = &do_intr_46;
-  intr_table[47] = &do_intr_47;
-  intr_table[48] = &do_intr_48;
-  intr_table[49] = &do_intr_49;
-  intr_table[50] = &do_intr_50;
-  intr_table[51] = &do_intr_51;
-  intr_table[52] = &do_intr_52;
-  intr_table[53] = &do_intr_53;
-  intr_table[54] = &do_intr_54;
-  intr_table[55] = &do_intr_55;
-  intr_table[56] = &do_intr_56;
-  intr_table[57] = &do_intr_57;
-  intr_table[58] = &do_intr_58;
-  intr_table[59] = &do_intr_59;
+  intr_table[40]   = &do_intr_40;
+  intr_table[41]   = &do_intr_41;
+  intr_table[42]   = &do_intr_42;
+  intr_table[43]   = &do_intr_43;
+  intr_table[44]   = &do_intr_44;
+  intr_table[45]   = &do_intr_45;
+  intr_table[46]   = &do_intr_46;
+  intr_table[47]   = &do_intr_47;
+  intr_table[48]   = &do_intr_48;
+  intr_table[49]   = &do_intr_49;
+  intr_table[50]   = &do_intr_50;
+  intr_table[51]   = &do_intr_51;
+  intr_table[52]   = &do_intr_52;
+  intr_table[53]   = &do_intr_53;
+  intr_table[54]   = &do_intr_54;
+  intr_table[55]   = &do_intr_55;
+  intr_table[56]   = &do_intr_56;
+  intr_table[57]   = &do_intr_57;
+  intr_table[58]   = &do_intr_58;
+  intr_table[59]   = &do_intr_59;
 
   /* 设置中断描述符表 */
   for(i=0; i<=2; i++)
@@ -203,7 +205,7 @@ void intr_init()
   for(i=6; i<=19; i++)
     set_trap_gate(i, intr_enter[i]);
   for(i=20; i<=31; i++)
-    set_trap_gate(i, intr_reserv_enter);
+    set_trap_gate(i, intr_reserv_enter); /* 陷阱门，不复位 IF 标志 */
   for(i=32; i<=47; i++)
     set_trap_gate(i, hwintr_enter[i-32]);
   for(i=48; i<=255; i++)
@@ -216,4 +218,3 @@ void intr_init()
   /* 宏函数(include/asm/io.h)： outb_p(value, port) inb_p(port) */
   outb_p(inb_p(0x21) & 0xF9, 0x21); /* 开启键盘中断（IRQ1）和接连从芯片（IRQ2） */
 }
-
