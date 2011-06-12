@@ -5,11 +5,24 @@
  *********************************************
  */
 
+#include <asm/io.h>     /* outb_p */
+
 #define ORIG  0xb8000                        /* 显存首地址 */
 static unsigned long video_num_columns = 80; /* 屏幕文本列数 */
 static unsigned long pos;                    /* 显示内存一位置 */
 static unsigned long x,y;                    /* 当前光标位置 */
 static unsigned char attr = 0x07;            /* 字符属性(黑底白字) */
+
+static inline void update_cursor(void);
+static inline void write_char(char);
+void con_init(void);                       /* 显示初始化 */
+int printk(const char *);                  /* 输出字符串 */
+int prints(const char *);                  /* 输出字符串 */
+void printa(const long a);                 /* 输出长整型变量 */
+void printbin(const unsigned long);        /* 输出二进制数 */
+void printchar(unsigned char c);           /* 显示字符 */
+void printhex(unsigned char c);            /* 显示十六进制数 */
+
 
 /* 显示初始化 */
 void con_init()
@@ -18,6 +31,7 @@ void con_init()
   y = 0;
   char * ph = ORIG;             /* 显存开始位置 */
   char * pe = ORIG + 4000;      /* 显存结束位置 */
+
   /* 清屏 */
   while(ph < pe) {
     *ph++ = 32;                 /* 显示空字符 */
@@ -25,6 +39,8 @@ void con_init()
   }
 
   printk("                  MKS -- Micro Kernel for Study                   ");
+
+  update_cursor();
 }
 
 /* 输出一字符,光标位置进一 */
@@ -34,14 +50,26 @@ static inline void write_char(char ch)
   *((char *)pos) = ch;
   *((char *)(pos+1)) = attr;
   x++;
+
   if(x >= 80) {
       y += x / 80;
       x = x % 80;
   }
+
   if(y >= 25) {
     con_init();
     y = y % 25;
   }
+}
+
+/* update_cursor: 设置光标跟随，更新光标位置 */
+static inline void update_cursor(void) {
+  pos = ORIG + (video_num_columns * y + x) * 2;
+
+  outb_p(0xE, 0x3D4);
+  outb_p((pos>>8) & 0xFF, 0x3D5);
+  outb_p(0xF, 0x3D4);
+  outb_p(pos & 0xFF, 0x3D5);
 }
 
 /* 光标移至下一行开头 */
@@ -60,10 +88,8 @@ void println(void)
     char * pe1 = ORIG + video_num_columns * 2;
 
     while(ph1 < pe1) {
-	  *ph1 = 32;
-	  ph1++;
-	  *ph1 = attr;
-	  ph1++;
+	  *ph1++ = 32;
+	  *ph1++ = attr;
 	}
 
     pe = ORIG + video_num_columns * 2 * y;
@@ -71,10 +97,8 @@ void println(void)
   }
 
   while(ph < pe) {
-    *ph = 32;
-    ph++;
-    *ph = attr;
-    ph++;
+    *ph++ = 32;
+    *ph++ = attr;
   }
 }
 

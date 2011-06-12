@@ -15,6 +15,7 @@ extern void intr_init(void);    /* 中断初始化(kernel/interrupt.c) */
 extern void time_init(void);    /* 时间初始化(time.c) */
 extern void proc_init(void);    /* 进程初始化(proc.c) */
 extern void msg_init(void);     /* 消息传递初始化(messaging.c) */
+extern void keyboard_init(void); /* 键盘初始化(driver/character/keyboard.c) */
 
 /* 物理地址应该不可能出现负数 */
 static unsigned long memory_end = 0;        /* 机器具有的物理内存容量(字节数) */
@@ -45,6 +46,7 @@ void main(void)
   time_init();                /* 时间初始化(kernel/time.c) */
   proc_init();                /* 进程初始化(kernel/proc.c) */
   msg_init();                 /* 消息传递初始化(kernel/messaging.c) */
+  keyboard_init();            /* 键盘初始化(driver/character/keyboard.c) */
 
   sti();                        /* include/asm/system.h */
   move_to_user_mode();          /* include/asm/system.h */
