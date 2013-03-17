@@ -37,7 +37,7 @@ intr_addr_t intr_reserv_enter  = &intr_reserved;
 intr_addr_t intr_msg_enter     = &intr_msg;
 intr_addr_t intr_kercall_enter = &intr_kercall;
 
-intr_proc_t intr_table[INTR_NUM]; /* 中断向量表 */
+intr_proc_t intr_table[INTR_NUM]; /* 中断处理函数表 */
 
 void do_intr_parallel(void)
 {
@@ -134,11 +134,11 @@ void intr_init()
 
   idt = IDT_ADDR;               /* IDT_ADDR = 0x6000 */
 
-  /* 初始化所有中断向量为保留的 */
+  /* 初始化所有中断处理函数为保留的 */
   for(i=0; i<255; i++)
     intr_table[i] = &do_intr_reserved;
 
-  /* 设置特定的中断向量 */
+  /* 设置特定的中断处理函数 */
   intr_table[13]   = &do_intr_debug2;
   intr_table[14]   = &do_intr_page;
   intr_table[32]   = &do_intr_clock;
